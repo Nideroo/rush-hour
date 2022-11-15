@@ -99,3 +99,11 @@ function getVehicleOrientation(vehicleID, board){
     }
     return "horizontal"
 }
+
+function getVehicleLength(vehicleID, board){
+    let vehicleLength = 0;
+    for (let i = 0; i < board.length; i++){
+        vehicleLength += board[i].count(vehicleID);
+    }
+    return vehicleLength
+}
