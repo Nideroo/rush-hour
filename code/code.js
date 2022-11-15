@@ -22,18 +22,10 @@ let myBoard = [[3, 3, 7, 9, 0, 0],
                [6, 6, 6, 0, 0, 0]];
 
 // HTML voor veelvoorkomende structuren
-const WALL_ROW = `
-<tr>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-<td class="wall"></td>
-</tr>
-`
+const WALL = "<td class='wall'></td>";
+const WALL_ROW = "<tr>" + WALL.repeat(8) + "</tr>";
+const EMPTY_SQUARE = "<td></td>"
+const EXIT_SQUARE = "<td id='exit'>EXIT</td>"
 
 // CSS classes voor verschillende voertuigen
 const VEHICLE_TYPES = { 1: "player",
@@ -48,9 +40,9 @@ const VEHICLE_TYPES = { 1: "player",
                        10: "npc9",
                        11: "npc10",
                        12: "npc11" }
+
 function drawBoard(board){
-    let boardHtml = generateBoardHtml(board);
-    document.getElementById("board-container").innerHTML = boardHtml;
+    document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
 
 window.onload = function(){
@@ -59,23 +51,51 @@ window.onload = function(){
 
 function generateBoardHtml(board){
     let boardHtml = "<table>";
+    boardHtml += WALL_ROW;
     for (let i = 0; i < board.length; i++){
         boardHtml += "<tr>";
+        boardHtml += WALL;
+        let rowContainsPlayer = false;
         for (let j = 0; j < board[0].length; j++){
             let value = board[i][j];
-            if (value == 0){
-                boardHtml += "<td></td>";
+            if (value === 0){
+                boardHtml += EMPTY_SQUARE;
             } else {
                 let vehicleType = getVehicleType(value);
+                if (vehicleType === "player"){
+                    rowContainsPlayer = true;
+                }
                 boardHtml += `<td class="vehicle ${vehicleType}"></td>`;
             }
         }
+        if (rowContainsPlayer === true) {
+            boardHtml += EXIT_SQUARE;
+        } else {
+            boardHtml += WALL;
+        }
         boardHtml += "</tr>";
     }
+    boardHtml += WALL_ROW;
     boardHtml += "</table>";
     return boardHtml;
 }
 
 function getVehicleType(vehicleID){
     return VEHICLE_TYPES[vehicleID];
+}
+
+function getVehicleOrientation(vehicleID, board){
+    if (vehicleID === 0){
+        return "horizontal";
+    }
+    let inNRows = 0;
+    for (let i = 0; i < board.length; i++){
+        if (board[i].includes(vehicleID) === true){
+            inNRows += 1;
+            if (inNRows > 1){
+                return "vertical";
+            }
+        }
+    }
+    return "horizontal"
 }

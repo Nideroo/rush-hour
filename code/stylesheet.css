@@ -67,3 +67,10 @@ td {
 .npc11 {
     background-color: #b34267;
 }
+
+#exit {
+    font-family: Helvetica, sans-serif;
+    font-weight: bolder;
+    font-size: 1em;
+    text-align: center;
+}
