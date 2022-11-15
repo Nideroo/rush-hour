@@ -84,6 +84,60 @@ function getVehicleType(vehicleID){
     return VEHICLE_TYPES[vehicleID];
 }
 
+function canMove(vehicleID, direction, board){
+    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
+    let vehicleLength = getVehicleLength(vehicleID, board);
+    let x, y;
+    [x, y] = getCoordsOfVehicle(vehicleID, board);
+    if (vehicleOrientation === "horizontal"){
+        if (direction === "left"){
+            return (x-1) > 0 && board[x-1][y] === 0;
+        } else if (direction === "right"){
+            return (x+vehicleLength) < board[0].length && board[x+1][y] === 0;
+        }
+    } else if (vehicleOrientation === "vertical"){
+        if (direction === "up"){
+            return (y-1) > 0 && board[x][y-1] === 0;
+        } else if (direction === "down"){
+            return (y+vehicleLength) < board.length && board[x][y+1] === 0;
+        }
+    }
+}
+
+function moveVehicle(vehicleID, direction, board){
+    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
+    let vehicleLength = getVehicleLength(vehicleID, board);
+    let x, y;
+    [x, y] = getCoordsOfVehicle(vehicleID, board);
+    if (vehicleOrientation === "horizontal"){
+        if (direction === "left"){
+            board[x][y] = 0;
+            board[x+vehicleLength][y] = vehicleID;
+        } else if (direction === "right"){
+            board[x+vehicleLength-1][y] = 0;
+            board[x-1][y] = vehicleID;
+        }
+    } else if (vehicleOrientation === "vertical"){
+        if (direction === "up"){
+            board[x][y+vehicleLength-1] = 0;
+            board[x][y-1] = vehicleID;
+        } else if (direction === "down"){
+            board[x][y] = 0;
+            board[x][y+vehicleLength] = vehicleID;
+        }
+    }
+}
+
+function getCoordsOfVehicle(vehicleID, board){
+    for (let i = 0; i < board.length; i++){
+        for (let j = 0; j < board[0].length; j++){
+            if (board[i][j] === vehicleID){
+                return [i, j];
+            }
+        }
+    }
+}
+
 function getVehicleOrientation(vehicleID, board){
     if (vehicleID === 0){
         return "horizontal";
@@ -107,3 +161,4 @@ function getVehicleLength(vehicleID, board){
     }
     return vehicleLength
 }
+

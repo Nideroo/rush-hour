@@ -24,48 +24,49 @@ td {
     background-color: red;
 }
 
+/* Eleven distinct colourblind-friendly colours were generated on medialab.github.io/iwanthue/*/
 .npc1 {
-    background-color: #678d3c;
+    background-color: #ff7889;
 }
 
 .npc2 {
-    background-color: #59378a;
+    background-color: #88ff5b;
 }
 
 .npc3 {
-    background-color: #5fc576;
+    background-color: #cb3bee;
 }
 
 .npc4 {
-    background-color: #bf73cb;
+    background-color: #008b20;
 }
 
 .npc5 {
-    background-color: #a8b141;
+    background-color: #630050;
 }
 
 .npc6 {
-    background-color: #677fd8;
+    background-color: #ffe780;
 }
 
 .npc7 {
-    background-color: #c5812d;
+    background-color: #004761;
 }
 
 .npc8 {
-    background-color: #48bf9e;
+    background-color: #dc3000;
 }
 
 .npc9 {
-    background-color: #be5899;
+    background-color: #28deff;
 }
 
 .npc10 {
-    background-color: #b67c44;
+    background-color: #004917;
 }
 
 .npc11 {
-    background-color: #b34267;
+    background-color: #efffd2;
 }
 
 #exit {
