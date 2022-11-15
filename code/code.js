@@ -52,17 +52,17 @@ window.onload = function(){
 function generateBoardHtml(board){
     let boardHtml = "<table>";
     boardHtml += WALL_ROW;
-    for (let i = 0; i < board.length; i++){
+    for (let i = 0; i < board.length; i++) {
         boardHtml += "<tr>";
         boardHtml += WALL;
         let rowContainsPlayer = false;
-        for (let j = 0; j < board[0].length; j++){
+        for (let j = 0; j < board[0].length; j++) {
             let value = board[i][j];
-            if (value === 0){
+            if (value === 0) {
                 boardHtml += EMPTY_SQUARE;
             } else {
                 let vehicleType = getVehicleType(value);
-                if (vehicleType === "player"){
+                if (vehicleType === "player") {
                     rowContainsPlayer = true;
                 }
                 boardHtml += `<td class="vehicle ${vehicleType}"></td>`;
@@ -80,75 +80,65 @@ function generateBoardHtml(board){
     return boardHtml;
 }
 
-function getVehicleType(vehicleID){
+function getVehicleType(vehicleID) {
     return VEHICLE_TYPES[vehicleID];
 }
 
-function canMove(vehicleID, direction, board){
-    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
+function canMove(vehicleID, direction, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     let row, col;
     [row, col] = getCoordsOfVehicle(vehicleID, board);
-    if (vehicleOrientation === "horizontal"){
-        if (direction === "left"){
-            return (col-1) > 0 && board[row][col-1] === 0;
-        } else if (direction === "right"){
-            return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
-        }
-    } else if (vehicleOrientation === "vertical"){
-        if (direction === "up"){
-            return (row-1) > 0 && board[row-1][col] === 0;
-        } else if (direction === "down"){
-            return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
-        }
+    if (direction === "left") {
+        return (col-1) > 0 && board[row][col-1] === 0;
+    } else if (direction === "right") {
+        return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
+    } else if (direction === "up") {
+        return (row-1) > 0 && board[row-1][col] === 0;
+    } else if (direction === "down") {
+        return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
     }
 }
 
-function moveVehicle(vehicleID, direction, board){
-    if (canMove(vehicleID, direction, board)){
-        let vehicleOrientation = getVehicleOrientation(vehicleID, board);
+function moveVehicle(vehicleID, direction, board) {
+    if (canMove(vehicleID, direction, board)) {
         let vehicleLength = getVehicleLength(vehicleID, board);
         let row, col;
         [row, col] = getCoordsOfVehicle(vehicleID, board);
-        if (vehicleOrientation === "horizontal") {
-            if (direction === "left") {
-                board[row][col + vehicleLength - 1] = 0;
-                board[row][col - 1] = vehicleID;
-            } else if (direction === "right") {
-                board[row][col] = 0;
-                board[row][col + vehicleLength] = vehicleID;
-            }
-        } else if (vehicleOrientation === "vertical") {
-            if (direction === "up") {
-                board[row + vehicleLength - 1][col] = 0;
-                board[row - 1][col] = vehicleID;
-            } else if (direction === "down") {
-                board[row][col] = 0;
-                board[row + vehicleLength][col] = vehicleID;
-            }
+        if (direction === "left") {
+            board[row][col + vehicleLength - 1] = 0;
+            board[row][col - 1] = vehicleID;
+        } else if (direction === "right") {
+            board[row][col] = 0;
+            board[row][col + vehicleLength] = vehicleID;
+        } else if (direction === "up") {
+            board[row + vehicleLength - 1][col] = 0;
+            board[row - 1][col] = vehicleID;
+        } else if (direction === "down") {
+            board[row][col] = 0;
+            board[row + vehicleLength][col] = vehicleID;
         }
     }
 }
 
-function getCoordsOfVehicle(vehicleID, board){
-    for (let i = 0; i < board.length; i++){
-        for (let j = 0; j < board[0].length; j++){
-            if (board[i][j] === vehicleID){
+function getCoordsOfVehicle(vehicleID, board) {
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] === vehicleID) {
                 return [i, j];
             }
         }
     }
 }
 
-function getVehicleOrientation(vehicleID, board){
-    if (vehicleID === 0){
+function getVehicleOrientation(vehicleID, board) {
+    if (vehicleID === 0) {
         return "horizontal";
     }
     let inNRows = 0;
-    for (let i = 0; i < board.length; i++){
-        if (board[i].includes(vehicleID) === true){
+    for (let i = 0; i < board.length; i++) {
+        if (board[i].includes(vehicleID) === true) {
             inNRows += 1;
-            if (inNRows > 1){
+            if (inNRows > 1) {
                 return "vertical";
             }
         }
@@ -156,15 +146,14 @@ function getVehicleOrientation(vehicleID, board){
     return "horizontal"
 }
 
-function getVehicleLength(vehicleID, board){
+function getVehicleLength(vehicleID, board) {
     let vehicleLength = 0;
-    for (let i = 0; i < board.length; i++){
-        for (let j = 0; j < board.length; j++){
-            if (board[i][j] === vehicleID){
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board.length; j++) {
+            if (board[i][j] === vehicleID) {
                 vehicleLength += 1;
             }
         }
     }
     return vehicleLength
 }
-
