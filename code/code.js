@@ -87,43 +87,45 @@ function getVehicleType(vehicleID){
 function canMove(vehicleID, direction, board){
     let vehicleOrientation = getVehicleOrientation(vehicleID, board);
     let vehicleLength = getVehicleLength(vehicleID, board);
-    let x, y;
-    [x, y] = getCoordsOfVehicle(vehicleID, board);
+    let row, col;
+    [row, col] = getCoordsOfVehicle(vehicleID, board);
     if (vehicleOrientation === "horizontal"){
         if (direction === "left"){
-            return (x-1) > 0 && board[x-1][y] === 0;
+            return (col-1) > 0 && board[row][col-1] === 0;
         } else if (direction === "right"){
-            return (x+vehicleLength) < board[0].length && board[x+1][y] === 0;
+            return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
         }
     } else if (vehicleOrientation === "vertical"){
         if (direction === "up"){
-            return (y-1) > 0 && board[x][y-1] === 0;
+            return (row-1) > 0 && board[row-1][col] === 0;
         } else if (direction === "down"){
-            return (y+vehicleLength) < board.length && board[x][y+1] === 0;
+            return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
         }
     }
 }
 
 function moveVehicle(vehicleID, direction, board){
-    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
-    let vehicleLength = getVehicleLength(vehicleID, board);
-    let x, y;
-    [x, y] = getCoordsOfVehicle(vehicleID, board);
-    if (vehicleOrientation === "horizontal"){
-        if (direction === "left"){
-            board[x][y] = 0;
-            board[x+vehicleLength][y] = vehicleID;
-        } else if (direction === "right"){
-            board[x+vehicleLength-1][y] = 0;
-            board[x-1][y] = vehicleID;
-        }
-    } else if (vehicleOrientation === "vertical"){
-        if (direction === "up"){
-            board[x][y+vehicleLength-1] = 0;
-            board[x][y-1] = vehicleID;
-        } else if (direction === "down"){
-            board[x][y] = 0;
-            board[x][y+vehicleLength] = vehicleID;
+    if (canMove(vehicleID, direction, board)){
+        let vehicleOrientation = getVehicleOrientation(vehicleID, board);
+        let vehicleLength = getVehicleLength(vehicleID, board);
+        let row, col;
+        [row, col] = getCoordsOfVehicle(vehicleID, board);
+        if (vehicleOrientation === "horizontal") {
+            if (direction === "left") {
+                board[row][col + vehicleLength - 1] = 0;
+                board[row][col - 1] = vehicleID;
+            } else if (direction === "right") {
+                board[row][col] = 0;
+                board[row][col + vehicleLength] = vehicleID;
+            }
+        } else if (vehicleOrientation === "vertical") {
+            if (direction === "up") {
+                board[row + vehicleLength - 1][col] = 0;
+                board[row - 1][col] = vehicleID;
+            } else if (direction === "down") {
+                board[row][col] = 0;
+                board[row + vehicleLength][col] = vehicleID;
+            }
         }
     }
 }
@@ -157,7 +159,11 @@ function getVehicleOrientation(vehicleID, board){
 function getVehicleLength(vehicleID, board){
     let vehicleLength = 0;
     for (let i = 0; i < board.length; i++){
-        vehicleLength += board[i].count(vehicleID);
+        for (let j = 0; j < board.length; j++){
+            if (board[i][j] === vehicleID){
+                vehicleLength += 1;
+            }
+        }
     }
     return vehicleLength
 }
