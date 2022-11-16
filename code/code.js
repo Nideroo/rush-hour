@@ -14,9 +14,18 @@ bv. 3x3 bord met één auto (lengte = 2) horizontaal geplaatst linksboven en é�
      [0, 0, 2]]
 */
 // Voorbeeldlevel "Intermediate"
+/*
 let myBoard = [[3, 3, 7, 9, 0, 0],
                [2, 2, 7, 9, 0, 0],
                [8, 1, 1, 9, 0, 0],
+               [8, 4, 4, 4, 0, 0],
+               [8, 5, 5, 0, 0, 0],
+               [6, 6, 6, 0, 0, 0]];
+*/
+// Instawin
+let myBoard = [[3, 3, 7, 9, 0, 0],
+               [2, 2, 7, 9, 0, 0],
+               [8, 1, 1, 0, 0, 0],
                [8, 4, 4, 4, 0, 0],
                [8, 5, 5, 0, 0, 0],
                [6, 6, 6, 0, 0, 0]];
@@ -99,15 +108,15 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     if (nSquaresAlreadyGenerated === 0) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} left"><</td>`;
+            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')"><</td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} up">^</td>`;
+            return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">^</td>`;
         }
     } else if (nSquaresAlreadyGenerated === vehicleLength-1) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} right">></td>`;
+            return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">></td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} down">v</td>`;
+            return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">v</td>`;
         }
     } else {
         return `<td class="vehicle ${vehicleType}"></td>`;
@@ -123,11 +132,11 @@ function canMove(vehicleID, direction, board) {
     let row, col;
     [row, col] = getCoordsOfVehicle(vehicleID, board);
     if (direction === "left") {
-        return (col-1) > 0 && board[row][col-1] === 0;
+        return (col-1) >= 0 && board[row][col-1] === 0;
     } else if (direction === "right") {
         return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
     } else if (direction === "up") {
-        return (row-1) > 0 && board[row-1][col] === 0;
+        return (row-1) >= 0 && board[row-1][col] === 0;
     } else if (direction === "down") {
         return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
     }
@@ -165,9 +174,6 @@ function getCoordsOfVehicle(vehicleID, board) {
 }
 
 function getVehicleOrientation(vehicleID, board) {
-    if (vehicleID === 0) {
-        return "horizontal";
-    }
     let inNRows = 0;
     for (let i = 0; i < board.length; i++) {
         if (board[i].includes(vehicleID) === true) {
@@ -190,4 +196,38 @@ function getVehicleLength(vehicleID, board) {
         }
     }
     return vehicleLength
+}
+
+function clickMoveVehicleHandler(vehicleID, direction) {
+    moveVehicle(vehicleID, direction, myBoard);
+    drawBoard(myBoard);
+    if (vehicleID === 1){
+        checkForWin(myBoard);
+    }
+}
+
+function winHandler() {
+    alert();
+}
+
+function checkForWin(board) {
+    playerOrientation = getVehicleOrientation(1, board);
+    playerLength = getVehicleLength(1, board);
+    let row, col;
+    [row, col] = getCoordsOfVehicle(1, board);
+    if (playerOrientation === "horizontal") {
+        for (let i = col+playerLength; i < board[0].length; i++) {
+            if (board[row][i] !== 0) {
+                return false;
+            }
+        }
+        return true;
+    } else if (playerOrientation === "vertical") {
+        for (let i = row+playerLength; i < board.length; i++) {
+            if (board[i][col] !== 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
