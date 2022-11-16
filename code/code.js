@@ -50,6 +50,18 @@ window.onload = function(){
 }
 
 function generateBoardHtml(board){
+    let nSquaresGeneratedPerVehicle = {  1: 0,
+                                         2: 0,
+                                         3: 0,
+                                         4: 0,
+                                         5: 0,
+                                         6: 0,
+                                         7: 0,
+                                         8: 0,
+                                         9: 0,
+                                        10: 0,
+                                        11: 0,
+                                        12: 0 }
     let boardHtml = "<table>";
     boardHtml += WALL_ROW;
     for (let i = 0; i < board.length; i++) {
@@ -65,7 +77,8 @@ function generateBoardHtml(board){
                 if (vehicleType === "player") {
                     rowContainsPlayer = true;
                 }
-                boardHtml += `<td class="vehicle ${vehicleType}"></td>`;
+                boardHtml += generateVehicleHtml(value, nSquaresGeneratedPerVehicle[value], board);
+                nSquaresGeneratedPerVehicle[value] += 1;
             }
         }
         if (rowContainsPlayer === true) {
@@ -78,6 +91,27 @@ function generateBoardHtml(board){
     boardHtml += WALL_ROW;
     boardHtml += "</table>";
     return boardHtml;
+}
+
+function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
+    let vehicleType = getVehicleType(vehicleID);
+    let vehicleOrientation = getVehicleOrientation(vehicleID, board)
+    let vehicleLength = getVehicleLength(vehicleID, board);
+    if (nSquaresAlreadyGenerated === 0) {
+        if (vehicleOrientation === "horizontal") {
+            return `<td class="vehicle ${vehicleType} left"><</td>`;
+        } else if (vehicleOrientation === "vertical") {
+            return `<td class="vehicle ${vehicleType} up">^</td>`;
+        }
+    } else if (nSquaresAlreadyGenerated === vehicleLength-1) {
+        if (vehicleOrientation === "horizontal") {
+            return `<td class="vehicle ${vehicleType} right">></td>`;
+        } else if (vehicleOrientation === "vertical") {
+            return `<td class="vehicle ${vehicleType} down">v</td>`;
+        }
+    } else {
+        return `<td class="vehicle ${vehicleType}"></td>`;
+    }
 }
 
 function getVehicleType(vehicleID) {

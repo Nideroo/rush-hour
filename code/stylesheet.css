@@ -69,6 +69,10 @@ td {
     background-color: #efffd2;
 }
 
+.left, .right, .up, .down {
+    text-align: center;
+}
+
 #exit {
     font-family: Helvetica, sans-serif;
     font-weight: bolder;
