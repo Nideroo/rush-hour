@@ -13,27 +13,6 @@ bv. 3x3 bord met één auto (lengte = 2) horizontaal geplaatst linksboven en é�
      [0, 0, 2]
      [0, 0, 2]]
 */
-// Voorbeeldlevel "Intermediate"
-/*
-let myBoard = [[3, 3, 7, 9, 0, 0],
-               [2, 2, 7, 9, 0, 0],
-               [8, 1, 1, 9, 0, 0],
-               [8, 4, 4, 4, 0, 0],
-               [8, 5, 5, 0, 0, 0],
-               [6, 6, 6, 0, 0, 0]];
-*/
-// Instawin
-let myBoard = [[3, 3, 7, 9, 0, 0],
-               [2, 2, 7, 9, 0, 0],
-               [8, 1, 1, 0, 0, 0],
-               [8, 4, 4, 4, 0, 0],
-               [8, 5, 5, 0, 0, 0],
-               [6, 6, 6, 0, 0, 0]];
-
-let nSeconds = 0;
-let timerInterval = 0;
-let nMoves = 0;
-let lastMovedVehicleID = 0;
 
 // HTML voor veelvoorkomende structuren
 const WALL = "<td class='wall'></td>";
@@ -55,22 +34,51 @@ const VEHICLE_TYPES = { 1: "player",
                        11: "npc10",
                        12: "npc11" }
 
+const LEVELS = { "Intermediate": [[3, 3, 7, 9, 0, 0],
+                                  [2, 2, 7, 9, 0, 0],
+                                  [8, 1, 1, 9, 0, 0],
+                                  [8, 4, 4, 4, 0, 0],
+                                  [8, 5, 5, 0, 0, 0],
+                                  [6, 6, 6, 0, 0, 0]],
+                 "Advanced": [[0, 4, 0, 7,  7,  7],
+                              [2, 4, 0, 8, 10,  0],
+                              [2, 1, 1, 8, 10, 11],
+                              [3, 5, 5, 5, 10, 11],
+                              [3, 0, 6, 0,  0, 12],
+                              [0, 0, 6, 9,  9, 12]],
+                 "Expert": [[2, 0, 0,  6,  6,  6],
+                            [2, 3, 3,  7,  0,  0],
+                            [1, 1, 4,  7,  0, 11],
+                            [0, 0, 4,  8,  8, 11],
+                            [0, 0, 5,  9,  9, 11],
+                            [0, 0, 5, 10, 10, 10]],
+                 "Grandmaster": [[2, 2, 6, 0,  9,  9],
+                                 [3, 3, 6, 0, 10,  0],
+                                 [4, 0, 1, 1, 10,  0],
+                                 [4, 7, 7, 7, 10, 11],
+                                 [4, 0, 0, 8,  0, 11],
+                                 [5, 5, 0, 8, 12, 12]]}
+
+let myGame = { board: LEVELS["Intermediate"],
+               time: 0,
+               timerInterval: 0,
+               moves: 0,
+               lastMovedVehicleID: 0
+}
+
 function drawBoard(board){
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
 
 window.onload = function(){
-    nSeconds = 0;
-    nMoves = 0;
-    lastMovedVehicleID = 0;
-    drawBoard(myBoard);
-    timerInterval = window.setInterval(incrementTimer, 1000);
+    drawBoard(myGame.board);
+    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
 }
 
 function incrementTimer() {
     let timer = document.getElementById("timer")
-    nSeconds += 1;
-    timer.innerText = nSeconds;
+    myGame.time += 1;
+    timer.innerText = myGame.time;
 }
 
 function generateBoardHtml(board){
@@ -176,15 +184,15 @@ function moveVehicle(vehicleID, direction, board) {
             board[row + vehicleLength][col] = vehicleID;
         }
         incrementMoveCountIfNeeded(vehicleID);
-        lastMovedVehicleID = vehicleID;
+        myGame.lastMovedVehicleID = vehicleID;
     }
 }
 
 function incrementMoveCountIfNeeded(vehicleID) {
-    if (vehicleID !== lastMovedVehicleID) {
-        let moveCount = document.getElementById("movecount")
-        nMoves += 1;
-        moveCount.innerText = nMoves;
+    if (vehicleID !== myGame.lastMovedVehicleID) {
+        let moveCounter = document.getElementById("movecounter")
+        myGame.moves += 1;
+        moveCounter.innerText = myGame.moves;
     }
 }
 
@@ -224,9 +232,9 @@ function getVehicleLength(vehicleID, board) {
 }
 
 function clickMoveVehicleHandler(vehicleID, direction) {
-    moveVehicle(vehicleID, direction, myBoard);
-    drawBoard(myBoard);
-    let hasWon = checkForWin(myBoard);
+    moveVehicle(vehicleID, direction, myGame.board);
+    drawBoard(myGame.board);
+    let hasWon = checkForWin(myGame.board);
     if (hasWon === true) {
         winHandler();
     }
@@ -234,7 +242,7 @@ function clickMoveVehicleHandler(vehicleID, direction) {
 
 function winHandler() {
     window.alert("YOU WON!");
-    window.clearInterval(timerInterval);
+    window.clearInterval(myGame.timerInterval);
 }
 
 function checkForWin(board) {

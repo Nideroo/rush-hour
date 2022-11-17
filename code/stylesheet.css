@@ -66,7 +66,7 @@ td {
 }
 
 .npc11 {
-    background-color: #efffd2;
+    background-color: #7f8e66;
 }
 
 .left, .right, .up, .down {
@@ -95,6 +95,8 @@ td {
     padding: 10px;
 }
 
-#timer-container, #movecount-container {
+#timer-container, #movecounter-container {
     text-align: center;
 }
+
+#buttons-container
