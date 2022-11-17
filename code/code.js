@@ -30,6 +30,11 @@ let myBoard = [[3, 3, 7, 9, 0, 0],
                [8, 5, 5, 0, 0, 0],
                [6, 6, 6, 0, 0, 0]];
 
+let nSeconds = 0;
+let timerInterval = 0;
+let nMoves = 0;
+let lastMovedVehicleID = 0;
+
 // HTML voor veelvoorkomende structuren
 const WALL = "<td class='wall'></td>";
 const WALL_ROW = "<tr>" + WALL.repeat(8) + "</tr>";
@@ -55,7 +60,17 @@ function drawBoard(board){
 }
 
 window.onload = function(){
+    nSeconds = 0;
+    nMoves = 0;
+    lastMovedVehicleID = 0;
     drawBoard(myBoard);
+    timerInterval = window.setInterval(incrementTimer, 1000);
+}
+
+function incrementTimer() {
+    let timer = document.getElementById("timer")
+    nSeconds += 1;
+    timer.innerText = nSeconds;
 }
 
 function generateBoardHtml(board){
@@ -108,15 +123,15 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     if (nSquaresAlreadyGenerated === 0) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')"><</td>`;
+            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">←</td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">^</td>`;
+            return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">↑</td>`;
         }
     } else if (nSquaresAlreadyGenerated === vehicleLength-1) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">></td>`;
+            return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">→</td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">v</td>`;
+            return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">↓</td>`;
         }
     } else {
         return `<td class="vehicle ${vehicleType}"></td>`;
@@ -160,6 +175,16 @@ function moveVehicle(vehicleID, direction, board) {
             board[row][col] = 0;
             board[row + vehicleLength][col] = vehicleID;
         }
+        incrementMoveCountIfNeeded(vehicleID);
+        lastMovedVehicleID = vehicleID;
+    }
+}
+
+function incrementMoveCountIfNeeded(vehicleID) {
+    if (vehicleID !== lastMovedVehicleID) {
+        let moveCount = document.getElementById("movecount")
+        nMoves += 1;
+        moveCount.innerText = nMoves;
     }
 }
 
@@ -201,18 +226,20 @@ function getVehicleLength(vehicleID, board) {
 function clickMoveVehicleHandler(vehicleID, direction) {
     moveVehicle(vehicleID, direction, myBoard);
     drawBoard(myBoard);
-    if (vehicleID === 1){
-        checkForWin(myBoard);
+    let hasWon = checkForWin(myBoard);
+    if (hasWon === true) {
+        winHandler();
     }
 }
 
 function winHandler() {
-    alert();
+    window.alert("YOU WON!");
+    window.clearInterval(timerInterval);
 }
 
 function checkForWin(board) {
-    playerOrientation = getVehicleOrientation(1, board);
-    playerLength = getVehicleLength(1, board);
+    let playerOrientation = getVehicleOrientation(1, board);
+    let playerLength = getVehicleLength(1, board);
     let row, col;
     [row, col] = getCoordsOfVehicle(1, board);
     if (playerOrientation === "horizontal") {
