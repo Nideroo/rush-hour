@@ -266,3 +266,17 @@ function checkForWin(board) {
         return true;
     }
 }
+
+function restartHandler(){
+    myGame = { board: LEVELS["Advanced"],
+               time: 0,
+               timerInterval: 0,
+               moves: 0,
+               lastMovedVehicleID: 0
+    }
+    let timer = document.getElementById("timer");
+    let moveCounter = document.getElementById("movecounter");
+    timer.innerText = myGame.time;
+    moveCounter.innerText = myGame.moves;
+    drawBoard(myGame);
+}
