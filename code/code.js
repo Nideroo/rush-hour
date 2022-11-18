@@ -14,10 +14,10 @@ bv. 3x3 bord met één auto (lengte = 2) horizontaal geplaatst linksboven en é�
      [0, 0, 2]]
 */
 
-// HTML voor veelvoorkomende structuren
+// HTML voor statische structuren op het spelbord
 const WALL = "<td class='wall'></td>";
 const WALL_ROW = "<tr>" + WALL.repeat(8) + "</tr>";
-const EMPTY_SQUARE = "<td></td>";
+const EMPTY_SQUARE = "<td class='empty'></td>";
 const EXIT_SQUARE = "<td id='exit'>EXIT</td>";
 
 // CSS classes voor verschillende voertuigen
@@ -35,12 +35,12 @@ const VEHICLE_TYPES = { 1: "player",
                        12:  "npc11" };
 
 const LEVELS = { "Beginner": [[0, 0, 0, 2, 0, 0],
-                              [0, 0, 0, 2, 0, 3],
-                              [0, 1, 1, 2, 4, 3],
+                              [0, 0, 1, 2, 0, 3],
+                              [0, 0, 1, 2, 4, 3],
                               [0, 0, 0, 0, 4, 0],
                               [0, 0, 0, 0, 0, 0],
-                              [5, 5, 0, 0, 0, 0]],
-                 "Intermediate": [[3, 3, 7, 0, 0, 0],
+                              [5, 5, 5, 0, 0, 0]],
+                 "Intermediate": [[3, 3, 7, 9, 0, 0],
                                   [2, 2, 7, 9, 0, 0],
                                   [8, 1, 1, 9, 0, 0],
                                   [8, 4, 4, 4, 0, 0],
@@ -70,13 +70,14 @@ let myGame = { board: [],
                timerInterval: null,
                moves: 0,
                lastMovedVehicleID: 0,
-               won: false};
+               won: false };
 
 function drawBoard(board) {
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
 
 window.onload = function() {
+    populateLevelMenu();
     restartHandler();
 }
 
@@ -84,6 +85,16 @@ function loadChosenLevel() {
     let chosenLevel = document.getElementById("level-menu").value;
     myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel]));
     drawBoard(myGame.board);
+}
+function populateLevelMenu() {
+    document.getElementById("level-menu").innerHTML = generateLevelMenuHtml();
+}
+function generateLevelMenuHtml() {
+    let levelMenuHtml = ""
+    for (const difficulty in LEVELS) {
+        levelMenuHtml += `<option value="${difficulty}">${difficulty}</option>`;
+    }
+    return levelMenuHtml;
 }
 
 function startTimer() {
@@ -99,6 +110,7 @@ function stopTimer() {
     clearInterval(myGame.timerInterval);
 }
 
+
 function generateBoardHtml(board) {
     let nSquaresGeneratedPerVehicle = {  1: 0,
                                          2: 0,
@@ -112,33 +124,35 @@ function generateBoardHtml(board) {
                                         10: 0,
                                         11: 0,
                                         12: 0 }
+    let playerOrientation = getVehicleOrientation(1, board);
+    let playerRow, playerCol;
+    [playerRow, playerCol] = getCoordsOfVehicle(1, board)
     let boardHtml = "<table>";
     boardHtml += WALL_ROW;
     for (let i = 0; i < board.length; i++) {
         boardHtml += "<tr>";
         boardHtml += WALL;
-        let rowContainsPlayer = false;
         for (let j = 0; j < board[0].length; j++) {
             let value = board[i][j];
             if (value === 0) {
                 boardHtml += EMPTY_SQUARE;
             } else {
-                let vehicleType = getVehicleType(value);
-                if (vehicleType === "player") {
-                    rowContainsPlayer = true;
-                }
                 boardHtml += generateVehicleHtml(value, nSquaresGeneratedPerVehicle[value], board);
                 nSquaresGeneratedPerVehicle[value] += 1;
             }
         }
-        if (rowContainsPlayer === true) {
+        if (playerOrientation === "horizontal" && i === playerRow) {
             boardHtml += EXIT_SQUARE;
         } else {
             boardHtml += WALL;
         }
         boardHtml += "</tr>";
     }
-    boardHtml += WALL_ROW;
+    if (playerOrientation === "vertical") {
+        boardHtml += WALL.repeat(playerCol + 1) + EXIT_SQUARE + WALL.repeat(board[0].length - playerCol);
+    } else {
+        boardHtml += WALL_ROW;
+    }
     boardHtml += "</table>";
     return boardHtml;
 }
@@ -149,15 +163,15 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     if (nSquaresAlreadyGenerated === 0) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">←</td>`;
+            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈    </td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">↑</td>`;
+            return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">🠉</td>`;
         }
     } else if (nSquaresAlreadyGenerated === vehicleLength-1) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">→</td>`;
+            return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">🠊</td>`;
         } else if (vehicleOrientation === "vertical") {
-            return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">↓</td>`;
+            return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">🠋</td>`;
         }
     } else {
         return `<td class="vehicle ${vehicleType}"></td>`;
@@ -279,19 +293,9 @@ function checkForWin(board) {
     let row, col;
     [row, col] = getCoordsOfVehicle(1, board);
     if (playerOrientation === "horizontal") {
-        for (let i = col+playerLength; i < board[0].length; i++) {
-            if (board[row][i] !== 0) {
-                return false;
-            }
-        }
-        return true;
-    } else if (playerOrientation === "vertical") {
-        for (let i = row+playerLength; i < board.length; i++) {
-            if (board[i][col] !== 0) {
-                return false;
-            }
-        }
-        return true;
+        return col === board[0].length - playerLength;
+    } else {
+        return row === board.length - playerLength;
     }
 }
 

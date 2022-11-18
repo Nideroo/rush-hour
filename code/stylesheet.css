@@ -1,8 +1,22 @@
 html {
-    min-height: 100% /* Prevents gradient in body from only filling viewport */
+    min-height: 100%; /* Prevents gradient in body from only filling viewport */
+    font-family: Helvetica, sans-serif;
 }
 body {
     background-image: linear-gradient(#2a70c7, #6497c9);
+}
+
+#red {
+    color: red;
+}
+
+#instructions {
+    margin: 5px auto;
+    text-align: center;
+    background-color: white;
+    width: max-content;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 #board-container {
@@ -21,14 +35,16 @@ td {
     width: 5em;
     height: 5em;
     position: relative;
-}
+ }
 
 .wall {
     background-color: darkgray;
+    border: 2px solid black;
 }
 
 .vehicle {
     border-radius: 5px;
+    color: black;
 }
 
 .player {
@@ -85,7 +101,6 @@ td {
 }
 
 #exit {
-    font-family: Helvetica, sans-serif;
     font-weight: bolder;
     font-size: 1em;
     text-align: center;
@@ -103,17 +118,46 @@ td {
 }
 
 #win {
-    background-color: white;
+    font-size: 2em;
+    background-color: rgba(255,255,255,0.8);
     padding: 10px;
+    margin-top: 10%;
+    text-align: center;
+    height: 50%;
+}
+
+#reload-button {
+    font-size: 1.5em;
+    border-radius: 5px;
+}
+
+#top-containers {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #timer-container, #movecounter-container, #level-menu-container {
-    width: max-content;
+    font-size: 1.5em;
     background-color: white;
-    padding: 5px;
-    margin: 5px auto;
+    width: max-content;
     text-align: center;
     border-radius: 5px;
+}
+
+#timer-container, #movecounter-container {
+    display: inline-block;
+    margin: 5px;
+    padding: 5px;
+}
+
+#level-menu-container {
+    padding: 5px;
+    margin: 5px auto;
+}
+
+#level-menu {
+    font-size: 1em;
 }
 
 #restart-button-container {
@@ -125,11 +169,12 @@ td {
 #restart-button {
     border-radius: 50%;
     border: 0;
-    padding-top: 6px;
-    width: 6em;
+    font-size: 3em;
+    font-weight: bolder;
+    width: 1.5em;
 }
 
-#restart-button:hover {
+#restart-button:hover, #reload-button:hover {
     background-color: red;
 }
 
