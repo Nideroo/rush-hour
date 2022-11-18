@@ -105,7 +105,7 @@ td {
     padding: 10px;
 }
 
-#timer-container, #movecounter-container {
+#timer-container, #movecounter-container, #level-menu-container {
     width: max-content;
     background-color: white;
     padding: 5px;
@@ -114,15 +114,18 @@ td {
     border-radius: 5px;
 }
 
-#button-container {
+#restart-button-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 footer {
+    margin: 5px auto;
     background-color: white;
     text-align: center;
-    font-size: 0.5em;
-    width: auto;
+    font-size: 0.75em;
+    width: max-content;
+    padding: 5px;
+    border-radius: 5px;
 }

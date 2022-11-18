@@ -17,22 +17,22 @@ bv. 3x3 bord met één auto (lengte = 2) horizontaal geplaatst linksboven en é�
 // HTML voor veelvoorkomende structuren
 const WALL = "<td class='wall'></td>";
 const WALL_ROW = "<tr>" + WALL.repeat(8) + "</tr>";
-const EMPTY_SQUARE = "<td></td>"
-const EXIT_SQUARE = "<td id='exit'>EXIT</td>"
+const EMPTY_SQUARE = "<td></td>";
+const EXIT_SQUARE = "<td id='exit'>EXIT</td>";
 
 // CSS classes voor verschillende voertuigen
 const VEHICLE_TYPES = { 1: "player",
-                        2: "npc1",
-                        3: "npc2",
-                        4: "npc3",
-                        5: "npc4",
-                        6: "npc5",
-                        7: "npc6",
-                        8: "npc7",
-                        9: "npc8",
-                       10: "npc9",
-                       11: "npc10",
-                       12: "npc11" }
+                        2:   "npc1",
+                        3:   "npc2",
+                        4:   "npc3",
+                        5:   "npc4",
+                        6:   "npc5",
+                        7:   "npc6",
+                        8:   "npc7",
+                        9:   "npc8",
+                       10:   "npc9",
+                       11:  "npc10",
+                       12:  "npc11" };
 
 const LEVELS = { "Intermediate": [[3, 3, 7, 9, 0, 0],
                                   [2, 2, 7, 9, 0, 0],
@@ -57,31 +57,38 @@ const LEVELS = { "Intermediate": [[3, 3, 7, 9, 0, 0],
                                  [4, 0, 1, 1, 10,  0],
                                  [4, 7, 7, 7, 10, 11],
                                  [4, 0, 0, 8,  0, 11],
-                                 [5, 5, 0, 8, 12, 12]]}
+                                 [5, 5, 0, 8, 12, 12]] };
 
-let myGame = { board: LEVELS["Intermediate"],
+let myGame = { board: [],
                time: 0,
-               timerInterval: 0,
+               timerInterval: null,
                moves: 0,
-               lastMovedVehicleID: 0
-}
+               lastMovedVehicleID: 0 };
 
 function drawBoard(board){
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
 
 window.onload = function(){
-    drawBoard(myGame.board);
-    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
+    restartHandler();
 }
 
+function loadChosenLevel() {
+    let chosenLevel = document.getElementById("level-menu").value;
+    myGame.board = LEVELS[chosenLevel];
+    drawBoard(myGame.board);
+}
+
+function startTimer() {
+    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
+}
 function incrementTimer() {
-    let timer = document.getElementById("timer")
+    let timer = document.getElementById("timer");
     myGame.time += 1;
     timer.innerText = myGame.time;
 }
 
-function generateBoardHtml(board){
+function generateBoardHtml(board) {
     let nSquaresGeneratedPerVehicle = {  1: 0,
                                          2: 0,
                                          3: 0,
@@ -185,6 +192,9 @@ function moveVehicle(vehicleID, direction, board) {
         }
         incrementMoveCountIfNeeded(vehicleID);
         myGame.lastMovedVehicleID = vehicleID;
+        if (myGame.timerInterval === null) {
+            startTimer();
+        }
     }
 }
 
@@ -267,16 +277,23 @@ function checkForWin(board) {
     }
 }
 
-function restartHandler(){
-    myGame = { board: LEVELS["Advanced"],
-               time: 0,
-               timerInterval: 0,
-               moves: 0,
-               lastMovedVehicleID: 0
-    }
+function restartHandler() {
+    resetTimer();
+    resetMoveCounter();
+    loadChosenLevel();
+    drawBoard(myGame.board);
+}
+
+function resetTimer() {
+    myGame.time = 0;
+    myGame.timerInterval = null;
     let timer = document.getElementById("timer");
-    let moveCounter = document.getElementById("movecounter");
     timer.innerText = myGame.time;
+}
+
+function resetMoveCounter() {
+    myGame.moves = 0;
+    myGame.lastMovedVehicleID = 0;
+    let moveCounter = document.getElementById("movecounter");
     moveCounter.innerText = myGame.moves;
-    drawBoard(myGame);
 }
