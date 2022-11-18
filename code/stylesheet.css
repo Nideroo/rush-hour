@@ -20,6 +20,7 @@ table {
 td {
     width: 5em;
     height: 5em;
+    position: relative;
 }
 
 .wall {
@@ -90,7 +91,7 @@ td {
     text-align: center;
 }
 
-.modal {
+#win-container {
     display: none;
     position: fixed;
     z-index: 1;
@@ -99,7 +100,7 @@ td {
     background-color: rgba(0,0,0,0.3);
 }
 
-.modal-content {
+#win {
     background-color: #aaaaaa;
     margin: 10% auto;
     padding: 10px;
@@ -118,6 +119,17 @@ td {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#restart-button {
+    border-radius: 50%;
+    border: 0;
+    padding-top: 6px;
+    width: 6em;
+}
+
+#restart-button:hover {
+    background-color: red;
 }
 
 footer {

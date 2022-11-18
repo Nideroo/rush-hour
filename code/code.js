@@ -34,7 +34,7 @@ const VEHICLE_TYPES = { 1: "player",
                        11:  "npc10",
                        12:  "npc11" };
 
-const LEVELS = { "Intermediate": [[3, 3, 7, 9, 0, 0],
+const LEVELS = { "Intermediate": [[3, 3, 7, 0, 0, 0],
                                   [2, 2, 7, 9, 0, 0],
                                   [8, 1, 1, 9, 0, 0],
                                   [8, 4, 4, 4, 0, 0],
@@ -75,7 +75,7 @@ window.onload = function(){
 
 function loadChosenLevel() {
     let chosenLevel = document.getElementById("level-menu").value;
-    myGame.board = LEVELS[chosenLevel];
+    myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel]));
     drawBoard(myGame.board);
 }
 
@@ -86,6 +86,10 @@ function incrementTimer() {
     let timer = document.getElementById("timer");
     myGame.time += 1;
     timer.innerText = myGame.time;
+}
+
+function stopTimer() {
+    clearInterval(myGame.timerInterval);
 }
 
 function generateBoardHtml(board) {
@@ -251,8 +255,7 @@ function clickMoveVehicleHandler(vehicleID, direction) {
 }
 
 function winHandler() {
-    window.alert("YOU WON!");
-    window.clearInterval(myGame.timerInterval);
+    stopTimer();
 }
 
 function checkForWin(board) {
@@ -285,6 +288,7 @@ function restartHandler() {
 }
 
 function resetTimer() {
+    clearInterval(myGame.timerInterval);
     myGame.time = 0;
     myGame.timerInterval = null;
     let timer = document.getElementById("timer");
