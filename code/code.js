@@ -34,12 +34,12 @@ const VEHICLE_TYPES = { 1: "player",
                        11:  "npc10",
                        12:  "npc11" };
 
-const LEVELS = { "Beginner": [[0, 0, 0, 9, 0, 0],
-                              [0, 0, 0, 9, 0, 6],
-                              [0, 1, 1, 9, 5, 6],
-                              [0, 0, 0, 0, 5, 0],
+const LEVELS = { "Beginner": [[0, 0, 0, 2, 0, 0],
+                              [0, 0, 0, 2, 0, 3],
+                              [0, 1, 1, 2, 4, 3],
+                              [0, 0, 0, 0, 4, 0],
                               [0, 0, 0, 0, 0, 0],
-                              [0, 0, 0, 0, 0, 0]],
+                              [5, 5, 0, 0, 0, 0]],
                  "Intermediate": [[3, 3, 7, 0, 0, 0],
                                   [2, 2, 7, 9, 0, 0],
                                   [8, 1, 1, 9, 0, 0],
@@ -69,7 +69,8 @@ let myGame = { board: [],
                time: 0,
                timerInterval: null,
                moves: 0,
-               lastMovedVehicleID: 0 };
+               lastMovedVehicleID: 0,
+               won: false};
 
 function drawBoard(board) {
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
@@ -252,17 +253,24 @@ function getVehicleLength(vehicleID, board) {
 }
 
 function clickMoveVehicleHandler(vehicleID, direction) {
-    moveVehicle(vehicleID, direction, myGame.board);
-    drawBoard(myGame.board);
-    let hasWon = checkForWin(myGame.board);
-    if (hasWon === true) {
-        winHandler();
+    if (myGame.won !== true) {
+        moveVehicle(vehicleID, direction, myGame.board);
+        drawBoard(myGame.board);
+        myGame.won = checkForWin(myGame.board);
+        if (myGame.won === true) {
+            winHandler();
+        }
     }
 }
 
 function winHandler() {
+    let timeWin = document.getElementById("time-win");
+    timeWin.innerText = myGame.time;
     stopTimer();
-    let win = document.getElementById("win")
+    let movesWin = document.getElementById("moves-win");
+    movesWin.innerText = myGame.moves;
+    let winContainer = document.getElementById("win-container");
+    winContainer.style.display = "block";
 }
 
 function checkForWin(board) {

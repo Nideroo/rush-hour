@@ -7,6 +7,15 @@
         <title>RUSH HOUR</title>
     </head>
     <body>
+        <div id="win-container">
+            <div id="win">
+                <p>
+                    Congratulations, you've won!
+                    It took you <span id="time-win"></span> seconds and <span id="moves-win"></span> moves.
+                </p>
+                <button onclick="location.reload()">Start a New Game</button>
+            </div>
+        </div>
         <div id="timer-container">
             <span>Time Elapsed: </span>
             <span id="timer">0</span>
@@ -37,11 +46,6 @@
                     <path style="fill:none;stroke:black;stroke-width:1.05833;stroke-miterlimit:4;stroke-dasharray:none" d="M8.933 3.847V1.033h2.659" transform="translate(-.82 -.504)"/>
                 </svg>
             </button>
-        </div>
-        <div id="win-container">
-            <div id="win">
-                <span>YOU WON!</span>
-            </div>
         </div>
     </body>
     <footer>
