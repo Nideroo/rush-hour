@@ -34,7 +34,13 @@ const VEHICLE_TYPES = { 1: "player",
                        11:  "npc10",
                        12:  "npc11" };
 
-const LEVELS = { "Intermediate": [[3, 3, 7, 0, 0, 0],
+const LEVELS = { "Beginner": [[0, 0, 0, 9, 0, 0],
+                              [0, 0, 0, 9, 0, 6],
+                              [0, 1, 1, 9, 5, 6],
+                              [0, 0, 0, 0, 5, 0],
+                              [0, 0, 0, 0, 0, 0],
+                              [0, 0, 0, 0, 0, 0]],
+                 "Intermediate": [[3, 3, 7, 0, 0, 0],
                                   [2, 2, 7, 9, 0, 0],
                                   [8, 1, 1, 9, 0, 0],
                                   [8, 4, 4, 4, 0, 0],
@@ -65,11 +71,11 @@ let myGame = { board: [],
                moves: 0,
                lastMovedVehicleID: 0 };
 
-function drawBoard(board){
+function drawBoard(board) {
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
 
-window.onload = function(){
+window.onload = function() {
     restartHandler();
 }
 
@@ -256,6 +262,7 @@ function clickMoveVehicleHandler(vehicleID, direction) {
 
 function winHandler() {
     stopTimer();
+    let win = document.getElementById("win")
 }
 
 function checkForWin(board) {

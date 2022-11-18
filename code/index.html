@@ -23,6 +23,7 @@
         <div id="level-menu-container">
             <label for="level-menu">Choose a level:</label>
             <select name="level-menu" id="level-menu" onchange="restartHandler()">
+                <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
                 <option value="Advanced">Advanced</option>
                 <option value="Expert">Expert</option>
@@ -38,7 +39,9 @@
             </button>
         </div>
         <div id="win-container">
-            <span>YOU WON!</span>
+            <div id="win">
+                <span>YOU WON!</span>
+            </div>
         </div>
     </body>
     <footer>
