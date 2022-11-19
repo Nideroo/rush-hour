@@ -1,57 +1,94 @@
-html {
-    min-height: 100%; /* Prevents gradient in body from only filling viewport */
-    font-family: Helvetica, sans-serif;
+#board-container {
+    margin: 10px;
 }
 
-body {
-    background-image: linear-gradient(#2a70c7, #6497c9);
+#exit {
+    font-size: 1em;
+    font-weight: bolder;
+    text-align: center;
+}
+
+#instructions {
+    background-color: #fff;
+    border-radius: 5px;
+    margin: 5px auto;
+    padding: 5px;
+    text-align: center;
+    width: max-content;
+}
+
+#level-menu {
+    font-size: 1em;
+}
+
+#level-menu-container {
+    margin: 5px auto;
+    padding: 5px;
 }
 
 #red {
     color: red;
 }
 
-#instructions {
-    margin: 5px auto;
-    text-align: center;
-    background-color: white;
-    width: max-content;
+#reload-button {
+    border-radius: 5px;
+    font-size: 1.5em;
+}
+
+#restart-button {
+    border: 0;
+    border-radius: 50%;
+    font-size: 3em;
+    font-weight: bolder;
+    width: 1.5em;
+}
+
+#timer-container, #movecounter-container {
+    display: inline-block;
+    margin: 5px;
     padding: 5px;
+}
+
+#timer-container, #movecounter-container, #level-menu-container {
+    background-color: #fff;
     border-radius: 5px;
+    font-size: 1.5em;
+    text-align: center;
+    width: max-content;
 }
 
-#board-container {
-    margin: 10px;
+#top-containers, #restart-button-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }
 
-table {
-    margin-left: auto;
-    margin-right: auto;
-    left: 25%;
-    right: 25%;
-    background-color: lightgrey;
+#win {
+    color: #fff;
+    background-color: rgba(255,255,255,0.8);
+    font-size: 2em;
+    height: 50%;
+    margin-top: 10%;
+    padding: 10px;
+    text-align: center;
 }
 
-td {
-    width: 5em;
-    height: 5em;
-    position: relative;
- }
-
-.wall {
-    background-color: darkgray;
-    border: 2px solid black;
+#win-container {
+    color: #000;
+    background-color: rgba(0,0,0,0.3);
+    display: none;
+    height: 50%;
+    margin-left: 25%;
+    margin-top: 10%;
+    position: fixed;
+    width: 50%;
+    z-index: 1;
 }
 
-.vehicle {
-    border-radius: 5px;
+.left, .right, .up, .down {
+    text-align: center;
 }
 
-.player {
-    background-color: red;
-}
-
-/* Eleven distinct colorblind-friendly colors were generated on medialab.github.io/iwanthue/*/
 .npc1 {
     background-color: #ff7889;
 }
@@ -96,94 +133,48 @@ td {
     background-color: #7f8e66;
 }
 
-.left, .right, .up, .down {
-    text-align: center;
-}
-
-#exit {
-    font-weight: bolder;
-    font-size: 1em;
-    text-align: center;
-}
-
-#win-container {
-    display: none;
-    position: fixed;
-    margin-left: 25%;
-    margin-top: 10%;
-    z-index: 1;
-    width: 50%;
-    height: 50%;
-    background-color: rgba(0,0,0,0.3);
-}
-
-#win {
-    font-size: 2em;
-    background-color: rgba(255,255,255,0.8);
-    padding: 10px;
-    margin-top: 10%;
-    text-align: center;
-    height: 50%;
-}
-
-#reload-button {
-    font-size: 1.5em;
-    border-radius: 5px;
-}
-
-#top-containers {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#timer-container, #movecounter-container, #level-menu-container {
-    font-size: 1.5em;
-    background-color: white;
-    width: max-content;
-    text-align: center;
-    border-radius: 5px;
-}
-
-#timer-container, #movecounter-container {
-    display: inline-block;
-    margin: 5px;
-    padding: 5px;
-}
-
-#level-menu-container {
-    padding: 5px;
-    margin: 5px auto;
-}
-
-#level-menu {
-    font-size: 1em;
-}
-
-#restart-button-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#restart-button {
-    border-radius: 50%;
-    border: 0;
-    font-size: 3em;
-    font-weight: bolder;
-    width: 1.5em;
-}
-
-#restart-button:hover, #reload-button:hover {
+.player, #restart-button:hover, #reload-button:hover {
     background-color: red;
 }
 
-footer {
-    margin: 5px auto;
-    background-color: white;
-    text-align: center;
-    font-size: 0.75em;
-    width: max-content;
-    padding: 5px;
+.vehicle {
     border-radius: 5px;
+}
+
+.wall {
+    background-color: #a9a9a9;
+    border: 2px solid #000;
+}
+
+body {
+    background-image: linear-gradient(#2a70c7,#6497c9);
+}
+
+footer {
+    background-color: #fff;
+    border-radius: 5px;
+    font-size: .75em;
+    margin: 5px auto;
+    padding: 5px;
+    text-align: center;
+    width: max-content;
+}
+
+html {
+    font-family: Helvetica, sans-serif;
+    min-height: 100%; /* Ensures background gradient takes up entire page */
+}
+
+table {
+    background-color: #d3d3d3;
+    left: 25%;
+    margin-left: auto;
+    margin-right: auto;
+    right: 25%;
+}
+
+td {
+    height: 5em;
+    position: relative;
+    width: 5em;
 }
