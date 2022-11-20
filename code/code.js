@@ -115,7 +115,7 @@ function drawBoard(board) {
 //   levelMenuHtml: string - HTML voor <option> tags om level te kiezen, gegenereerd op basis van const LEVELS
 function generateLevelMenuHtml() {
     let levelMenuHtml = ""
-    for (const difficulty in LEVELS) {
+    for (const difficulty in LEVELS) { // Itereer over moeilijkheidsgraden in LEVELS
         levelMenuHtml += `<option value="${difficulty}">${difficulty}</option>`;
     }
     return levelMenuHtml;
@@ -144,7 +144,6 @@ function generateBoardHtml(board) {
     let playerRow, playerCol;
     [playerRow, playerCol] = getCoordsOfVehicle(1, board);
     let boardHtml = "<table>";
-
     boardHtml += WALL_ROW; // Bord bestaat uit feitelijke spelbord omringd door muren met één EXIT
     for (let i = 0; i < board.length; i++) { // Itereer over rijen
         boardHtml += "<tr>";
@@ -185,7 +184,6 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleType = getVehicleType(vehicleID);
     let vehicleOrientation = getVehicleOrientation(vehicleID, board);
     let vehicleLength = getVehicleLength(vehicleID, board);
-
     if (nSquaresAlreadyGenerated === 0) { // Eerste vakje
         if (vehicleOrientation === "horizontal") { // Genereer vakje met pijl naar links
             return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈</td>`;
@@ -198,7 +196,7 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
         } else if (vehicleOrientation === "vertical") { // Genereer vakje met pijl naar beneden
             return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">🠋</td>`;
         }
-    } else { // Middelste vakje (enkel bij voertuigen met lengte == 3), geen extra functionaliteit
+    } else { // Middelste vakje (enkel bij voertuigen met lengte > 2), geen extra functionaliteit
         return `<td class="vehicle ${vehicleType}"></td>`;
     }
 }
@@ -207,16 +205,23 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
 /* FUNCTIES OM ALGEMENE GEGEVENS VAN EEN VOERTUIG TE BEPALEN */
 
 // Input:
-//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in VEHICLE_TYPES
+//   board: 2D-array - feitelijke spelbord
+// Output:
+//   string - CSS class die overeeenkomt met item in VEHICLE_TYPES met als key vehicleID
 function getVehicleType(vehicleID) {
     return VEHICLE_TYPES[vehicleID];
 }
 
 // Input:
-//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in VEHICLE_TYPES
+//   board: 2D-array - feitelijke spelbord
+// Output:
+//   array van twee integers - zero-indexed coördinaten [rij, kolom] van eerste vakje van voertuig
+//                             (tegengekomen van links naar rechts en boven naar onder op het spelbord)
 function getCoordsOfVehicle(vehicleID, board) {
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[0].length; j++) {
+    for (let i = 0; i < board.length; i++) { // Itereer over rijen
+        for (let j = 0; j < board[0].length; j++) { // Itereer over kolommen
             if (board[i][j] === vehicleID) {
                 return [i, j];
             }
@@ -225,26 +230,33 @@ function getCoordsOfVehicle(vehicleID, board) {
 }
 
 // Input:
-//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in VEHICLE_TYPES
+//   board: 2D-array - feitelijke spelbord
+// Output:
+// string - oriëntatie "horizontal" of "vertical"
 function getVehicleOrientation(vehicleID, board) {
     let inNRows = 0;
-    for (let i = 0; i < board.length; i++) {
-        if (board[i].includes(vehicleID) === true) {
+    for (let i = 0; i < board.length; i++) { // Itereer over rijen
+        if (board[i].includes(vehicleID) === true) { // Voertuig heeft minstens één vakje in deze rij
             inNRows += 1;
-            if (inNRows > 1) {
+            if (inNRows > 1) { // Als een voertuig in meerdere rijen vakjes heeft staat het verticaal
                 return "vertical";
             }
         }
     }
+    // if inNRows == 1 (eigenlijk < 2)
     return "horizontal"
 }
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   board: 2D-array - feitelijke spelbord
+// Output:
+//   vehicleLength: integer - aantal vakjes dat voertuig inneemt
 function getVehicleLength(vehicleID, board) {
     let vehicleLength = 0;
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board.length; j++) {
+    for (let i = 0; i < board.length; i++) { // Itereer over rijen
+        for (let j = 0; j < board.length; j++) { // Itereer over kolommen
             if (board[i][j] === vehicleID) {
                 vehicleLength += 1;
             }
@@ -258,8 +270,12 @@ function getVehicleLength(vehicleID, board) {
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   direction: string - een richting "left", "right", "up" of "down"
+// Effect:
+//   Beweegt voertuig indien mogelijk, tekent dan bord opnieuw en kijkt of het spel gewonnen is
 function clickMoveVehicleHandler(vehicleID, direction) {
-    if (myGame.won !== true) {
+    // Geen zetten toelaten als spel al gewonnen is
+    if (myGame.won !== true && canMove(vehicleID, direction, myGame.board)) {
         moveVehicle(vehicleID, direction, myGame.board);
         drawBoard(myGame.board);
         myGame.won = checkForWin(myGame.board);
@@ -271,29 +287,33 @@ function clickMoveVehicleHandler(vehicleID, direction) {
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   direction: string - een richting "left", "right", "up" of "down"
+//   board: 2D-array - feitelijke spelbord
 function moveVehicle(vehicleID, direction, board) {
-    if (canMove(vehicleID, direction, board)) {
-        let vehicleLength = getVehicleLength(vehicleID, board);
-        let row, col;
-        [row, col] = getCoordsOfVehicle(vehicleID, board);
-        if (direction === "left") {
+    let vehicleLength = getVehicleLength(vehicleID, board);
+    let row, col;
+    [row, col] = getCoordsOfVehicle(vehicleID, board);
+    switch (direction) {
+        case "left":
             board[row][col + vehicleLength - 1] = 0;
             board[row][col - 1] = vehicleID;
-        } else if (direction === "right") {
+            break;
+        case "right":
             board[row][col] = 0;
             board[row][col + vehicleLength] = vehicleID;
-        } else if (direction === "up") {
+            break;
+        case "up":
             board[row + vehicleLength - 1][col] = 0;
             board[row - 1][col] = vehicleID;
-        } else if (direction === "down") {
+            break;
+        case "down":
             board[row][col] = 0;
             board[row + vehicleLength][col] = vehicleID;
-        }
-        incrementMoveCountIfNeeded(vehicleID);
-        myGame.lastMovedVehicleID = vehicleID;
-        if (myGame.timerInterval === null) {
-            startTimer();
-        }
+    }
+    incrementMoveCountIfNeeded(vehicleID);
+    myGame.lastMovedVehicleID = vehicleID;
+    if (myGame.timerInterval === null) {
+        startTimer();
     }
 }
 
