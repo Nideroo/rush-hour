@@ -78,17 +78,22 @@ window.onload = function() {
     restartHandler();
 }
 
+// Effect:
+//   Vult level menu met moeilijkheidsgraden van beschikbare levels
 function populateLevelMenu() {
     document.getElementById("level-menu").innerHTML = generateLevelMenuHtml();
 }
 
-// Wordt opgeroepen als speler een nieuw level kiest of op restart-knop klikt
+// Effect:
+//   Herstart spel op basis van selectie in level menu
 function restartHandler() {
     resetTimer();
     resetMoveCounter();
     loadChosenLevel();
 }
 
+// Effect:
+//   Haalt gekozen level op, kopieert dit, en roept drawBoard() op om dit te tekenen
 function loadChosenLevel() {
     let chosenLevel = document.getElementById("level-menu").value;
     myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel])); // Deep copy
@@ -97,6 +102,8 @@ function loadChosenLevel() {
 
 // Input:
 //   board: 2D-array - feitelijke spelbord
+// Effect:
+//   Zet interne representatie om naar externe representatie op webpagina
 function drawBoard(board) {
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
@@ -199,10 +206,14 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* FUNCTIES OM ALGEMENE GEGEVENS VAN EEN VOERTUIG TE BEPALEN */
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function getVehicleType(vehicleID) {
     return VEHICLE_TYPES[vehicleID];
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function getCoordsOfVehicle(vehicleID, board) {
     for (let i = 0; i < board.length; i++) {
         for (let j = 0; j < board[0].length; j++) {
@@ -213,6 +224,8 @@ function getCoordsOfVehicle(vehicleID, board) {
     }
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function getVehicleOrientation(vehicleID, board) {
     let inNRows = 0;
     for (let i = 0; i < board.length; i++) {
@@ -226,6 +239,8 @@ function getVehicleOrientation(vehicleID, board) {
     return "horizontal"
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function getVehicleLength(vehicleID, board) {
     let vehicleLength = 0;
     for (let i = 0; i < board.length; i++) {
@@ -241,6 +256,8 @@ function getVehicleLength(vehicleID, board) {
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* FUNCTIES OM EEN VOERTUIG TE BEWEGEN */
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function clickMoveVehicleHandler(vehicleID, direction) {
     if (myGame.won !== true) {
         moveVehicle(vehicleID, direction, myGame.board);
@@ -252,6 +269,8 @@ function clickMoveVehicleHandler(vehicleID, direction) {
     }
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function moveVehicle(vehicleID, direction, board) {
     if (canMove(vehicleID, direction, board)) {
         let vehicleLength = getVehicleLength(vehicleID, board);
@@ -278,6 +297,8 @@ function moveVehicle(vehicleID, direction, board) {
     }
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function canMove(vehicleID, direction, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     let row, col;
@@ -293,6 +314,8 @@ function canMove(vehicleID, direction, board) {
     }
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 function incrementMoveCountIfNeeded(vehicleID) {
     if (vehicleID !== myGame.lastMovedVehicleID) {
         let moveCounter = document.getElementById("movecounter")
@@ -300,6 +323,7 @@ function incrementMoveCountIfNeeded(vehicleID) {
         moveCounter.innerText = myGame.moves;
     }
 }
+
 
 function resetMoveCounter() {
     myGame.moves = 0;
