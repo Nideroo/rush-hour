@@ -64,7 +64,7 @@
 }
 
 #win {
-    color: #fff;
+    color: #000;
     background-color: rgba(255,255,255,0.8);
     font-size: 2em;
     height: 50%;
@@ -139,6 +139,8 @@
 
 .vehicle {
     border-radius: 5px;
+    color: #181818;
+    font-size: 24px;
 }
 
 .wall {
@@ -174,7 +176,6 @@ table {
 }
 
 td {
-    height: 5em;
-    position: relative;
-    width: 5em;
+    height: 80px;
+    width: 80px;
 }
