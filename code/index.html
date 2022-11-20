@@ -7,10 +7,10 @@
         <title>RUSH HOUR</title>
     </head>
     <body>
-        <div id="win-container"> <!-- Hidden until game is won -->
+        <div id="win-container"> <!-- Verborgen tot spel gewonnen is -->
             <div id="win">
                 <p>
-                    Congratulations, you've won!
+                    Congratulations, you've won! <br>
                     It took you <span id="time-win"></span> seconds and <span id="moves-win"></span> moves.
                 </p>
                 <button id="reload-button" onclick="location.reload()">Start a New Game</button>
@@ -29,12 +29,12 @@
             </div>
         </div>
         <div id="board-container">
-            <!-- Dynamically generated -->
+            <!-- Dynamisch gegenereerd -->
         </div>
         <div id="level-menu-container">
             <label for="level-menu">Choose a level:</label>
             <select name="level-menu" id="level-menu" onchange="restartHandler()">
-                <!-- Dynamically generated -->
+                <!-- Dynamisch gegenereerd -->
             </select>
         </div>
         <div id="restart-button-container">

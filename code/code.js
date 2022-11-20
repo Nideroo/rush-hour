@@ -72,7 +72,7 @@ let myGame = { board: [],
                won: false };
 
 /* ------------------------------------------------------------------------------------------------------------------ */
-/* FUNCTIES OM GAME OP TE STARTEN / TE HERSTARTEN*/
+/* FUNCTIES OM GAME OP TE STARTEN OF TE HERSTARTEN*/
 window.onload = function() {
     populateLevelMenu();
     restartHandler();
@@ -96,7 +96,7 @@ function loadChosenLevel() {
 }
 
 // Input:
-//   board: 2D-array van feitelijke spelbord
+//   board: 2D-array - feitelijke spelbord
 function drawBoard(board) {
     document.getElementById("board-container").innerHTML = generateBoardHtml(board);
 }
@@ -105,7 +105,7 @@ function drawBoard(board) {
 /* FUNCTIES OM HTML TE GENEREREN */
 
 // Output:
-//   levelMenuHtml: string met HTML voor <select> menu om level te kiezen, gegenereerd op basis van const LEVELS
+//   levelMenuHtml: string - HTML voor <option> tags om level te kiezen, gegenereerd op basis van const LEVELS
 function generateLevelMenuHtml() {
     let levelMenuHtml = ""
     for (const difficulty in LEVELS) {
@@ -115,7 +115,9 @@ function generateLevelMenuHtml() {
 }
 
 // Input:
-//   board: 2D-array van feitelijke spelbord
+//   board: 2D-array - feitelijke spelbord
+// Output:
+//   boardHtml: string - HTML voor <table> die spelbord extern voorstelt
 function generateBoardHtml(board) {
     // Hou het aantal reeds gegenereerde vakjes per voertuig bij
     // om te weten welk soort vakje nog nodig is afhankelijk van lengte en oriëntatie
@@ -166,23 +168,30 @@ function generateBoardHtml(board) {
     return boardHtml;
 }
 
+// Input:
+//   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
+//   nSquaresAlreadyGenerated: integer - hoeveel vakjes reeds gegenereerd zijn voor dit voertuig
+//   board: 2D-array - feitelijke spelbord
+// Output:
+//   string met HTML voor <td> die een deel van voertuig extern voorstelt
 function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleType = getVehicleType(vehicleID);
-    let vehicleOrientation = getVehicleOrientation(vehicleID, board)
+    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
     let vehicleLength = getVehicleLength(vehicleID, board);
-    if (nSquaresAlreadyGenerated === 0) {
-        if (vehicleOrientation === "horizontal") {
+
+    if (nSquaresAlreadyGenerated === 0) { // Eerste vakje
+        if (vehicleOrientation === "horizontal") { // Genereer vakje met pijl naar links
             return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈</td>`;
-        } else if (vehicleOrientation === "vertical") {
+        } else if (vehicleOrientation === "vertical") { // Genereer vakje met pijl naar boven
             return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">🠉</td>`;
         }
-    } else if (nSquaresAlreadyGenerated === vehicleLength-1) {
-        if (vehicleOrientation === "horizontal") {
+    } else if (nSquaresAlreadyGenerated === vehicleLength-1) { // Laatste vakje
+        if (vehicleOrientation === "horizontal") { // Genereer vakje met pijl naar rechts
             return `<td class="vehicle ${vehicleType} right" onclick="clickMoveVehicleHandler(${vehicleID}, 'right')">🠊</td>`;
-        } else if (vehicleOrientation === "vertical") {
+        } else if (vehicleOrientation === "vertical") { // Genereer vakje met pijl naar beneden
             return `<td class="vehicle ${vehicleType} down" onclick="clickMoveVehicleHandler(${vehicleID}, 'down')">🠋</td>`;
         }
-    } else {
+    } else { // Middelste vakje (enkel bij voertuigen met lengte == 3), geen extra functionaliteit
         return `<td class="vehicle ${vehicleType}"></td>`;
     }
 }
