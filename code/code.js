@@ -2,18 +2,11 @@
 RUSH HOUR
 Nicolas De Roover
 r0702537
-2022-2023
 voor het vak Informaticawerktuigen binnen de Bachelor Informatica
+Academiejaar 2022-2023
  */
-/*
-Interne Representatie Spelbord:
-2D-array met een uniek cijfer > 0 per positie die opgenomen wordt door een voertuig, en 0 per lege positie
-bv. 3x3 bord met één auto (lengte = 2) horizontaal geplaatst linksboven en één auto verticaal geplaatst rechtsonder
-    [[1, 1, 0],
-     [0, 0, 2]
-     [0, 0, 2]]
-*/
 
+/* CONSTANTEN EN GLOBALE VARIABELEN */
 // HTML voor statische structuren op het spelbord
 const WALL = "<td class='wall'></td>";
 const WALL_ROW = "<tr>" + WALL.repeat(8) + "</tr>";
@@ -34,6 +27,11 @@ const VEHICLE_TYPES = { 1: "player",
                        11:  "npc10",
                        12:  "npc11" };
 
+// Levels met als key hun moeilijkheidsgraad
+// INTERNAL REPRESENTATION:
+//   2D-array
+//   Unieke integer > 0 per voertuig per positie die opgenomen wordt door voertuig
+//   0 per lege positie
 const LEVELS = { "Beginner": [[0, 0, 0, 2, 0, 0],
                               [0, 0, 1, 2, 0, 3],
                               [0, 0, 1, 2, 4, 3],
@@ -65,6 +63,7 @@ const LEVELS = { "Beginner": [[0, 0, 0, 2, 0, 0],
                                  [4, 0, 0, 8,  0, 11],
                                  [5, 5, 0, 8, 12, 12]] };
 
+// Globaal object om gamestate bij te houden
 let myGame = { board: [],
                time: 0,
                timerInterval: null,
@@ -72,23 +71,41 @@ let myGame = { board: [],
                lastMovedVehicleID: 0,
                won: false };
 
-function drawBoard(board) {
-    document.getElementById("board-container").innerHTML = generateBoardHtml(board);
-}
-
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM GAME OP TE STARTEN / TE HERSTARTEN*/
 window.onload = function() {
     populateLevelMenu();
     restartHandler();
 }
 
-function loadChosenLevel() {
-    let chosenLevel = document.getElementById("level-menu").value;
-    myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel]));
-    drawBoard(myGame.board);
-}
 function populateLevelMenu() {
     document.getElementById("level-menu").innerHTML = generateLevelMenuHtml();
 }
+
+// Wordt opgeroepen als speler een nieuw level kiest of op restart-knop klikt
+function restartHandler() {
+    resetTimer();
+    resetMoveCounter();
+    loadChosenLevel();
+}
+
+function loadChosenLevel() {
+    let chosenLevel = document.getElementById("level-menu").value;
+    myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel])); // Deep copy
+    drawBoard(myGame.board);
+}
+
+// Input:
+//   board: 2D-array van feitelijke spelbord
+function drawBoard(board) {
+    document.getElementById("board-container").innerHTML = generateBoardHtml(board);
+}
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM HTML TE GENEREREN */
+
+// Output:
+//   levelMenuHtml: string met HTML voor <select> menu om level te kiezen, gegenereerd op basis van const LEVELS
 function generateLevelMenuHtml() {
     let levelMenuHtml = ""
     for (const difficulty in LEVELS) {
@@ -97,43 +114,34 @@ function generateLevelMenuHtml() {
     return levelMenuHtml;
 }
 
-function startTimer() {
-    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
-}
-function incrementTimer() {
-    let timer = document.getElementById("timer");
-    myGame.time += 1;
-    timer.innerText = myGame.time;
-}
-
-function stopTimer() {
-    clearInterval(myGame.timerInterval);
-}
-
-
+// Input:
+//   board: 2D-array van feitelijke spelbord
 function generateBoardHtml(board) {
-    let nSquaresGeneratedPerVehicle = {  1: 0,
-                                         2: 0,
-                                         3: 0,
-                                         4: 0,
-                                         5: 0,
-                                         6: 0,
-                                         7: 0,
-                                         8: 0,
-                                         9: 0,
-                                        10: 0,
-                                        11: 0,
-                                        12: 0 }
+    // Hou het aantal reeds gegenereerde vakjes per voertuig bij
+    // om te weten welk soort vakje nog nodig is afhankelijk van lengte en oriëntatie
+    let nSquaresGeneratedPerVehicle = {   1: 0,
+                                          2: 0,
+                                          3: 0,
+                                          4: 0,
+                                          5: 0,
+                                          6: 0,
+                                          7: 0,
+                                          8: 0,
+                                          9: 0,
+                                         10: 0,
+                                         11: 0,
+                                         12: 0 }
     let playerOrientation = getVehicleOrientation(1, board);
     let playerRow, playerCol;
-    [playerRow, playerCol] = getCoordsOfVehicle(1, board)
+    [playerRow, playerCol] = getCoordsOfVehicle(1, board);
     let boardHtml = "<table>";
-    boardHtml += WALL_ROW;
-    for (let i = 0; i < board.length; i++) {
+
+    boardHtml += WALL_ROW; // Bord bestaat uit feitelijke spelbord omringd door muren met één EXIT
+    for (let i = 0; i < board.length; i++) { // Itereer over rijen
         boardHtml += "<tr>";
         boardHtml += WALL;
-        for (let j = 0; j < board[0].length; j++) {
-            let value = board[i][j];
+        for (let j = 0; j < board[0].length; j++) { // Itereer over kolommen
+            let value = board[i][j]; // 0 of unieke integer per voertuig
             if (value === 0) {
                 boardHtml += EMPTY_SQUARE;
             } else {
@@ -141,14 +149,15 @@ function generateBoardHtml(board) {
                 nSquaresGeneratedPerVehicle[value] += 1;
             }
         }
-        if (playerOrientation === "horizontal" && i === playerRow) {
+        if (playerOrientation === "horizontal" && i === playerRow) { // Bij horizontale speler EXIT naast rij genereren
             boardHtml += EXIT_SQUARE;
         } else {
             boardHtml += WALL;
         }
         boardHtml += "</tr>";
     }
-    if (playerOrientation === "vertical") {
+    if (playerOrientation === "vertical") { // Bij verticale speler EXIT onder kolom genereren
+        // Totale breedte van tabel == board[0].length + 2
         boardHtml += WALL.repeat(playerCol + 1) + EXIT_SQUARE + WALL.repeat(board[0].length - playerCol);
     } else {
         boardHtml += WALL_ROW;
@@ -163,7 +172,7 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     let vehicleLength = getVehicleLength(vehicleID, board);
     if (nSquaresAlreadyGenerated === 0) {
         if (vehicleOrientation === "horizontal") {
-            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈    </td>`;
+            return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈</td>`;
         } else if (vehicleOrientation === "vertical") {
             return `<td class="vehicle ${vehicleType} up" onclick="clickMoveVehicleHandler(${vehicleID}, 'up')">🠉</td>`;
         }
@@ -178,57 +187,11 @@ function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
     }
 }
 
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM ALGEMENE GEGEVENS VAN EEN VOERTUIG TE BEPALEN */
+
 function getVehicleType(vehicleID) {
     return VEHICLE_TYPES[vehicleID];
-}
-
-function canMove(vehicleID, direction, board) {
-    let vehicleLength = getVehicleLength(vehicleID, board);
-    let row, col;
-    [row, col] = getCoordsOfVehicle(vehicleID, board);
-    if (direction === "left") {
-        return (col-1) >= 0 && board[row][col-1] === 0;
-    } else if (direction === "right") {
-        return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
-    } else if (direction === "up") {
-        return (row-1) >= 0 && board[row-1][col] === 0;
-    } else if (direction === "down") {
-        return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
-    }
-}
-
-function moveVehicle(vehicleID, direction, board) {
-    if (canMove(vehicleID, direction, board)) {
-        let vehicleLength = getVehicleLength(vehicleID, board);
-        let row, col;
-        [row, col] = getCoordsOfVehicle(vehicleID, board);
-        if (direction === "left") {
-            board[row][col + vehicleLength - 1] = 0;
-            board[row][col - 1] = vehicleID;
-        } else if (direction === "right") {
-            board[row][col] = 0;
-            board[row][col + vehicleLength] = vehicleID;
-        } else if (direction === "up") {
-            board[row + vehicleLength - 1][col] = 0;
-            board[row - 1][col] = vehicleID;
-        } else if (direction === "down") {
-            board[row][col] = 0;
-            board[row + vehicleLength][col] = vehicleID;
-        }
-        incrementMoveCountIfNeeded(vehicleID);
-        myGame.lastMovedVehicleID = vehicleID;
-        if (myGame.timerInterval === null) {
-            startTimer();
-        }
-    }
-}
-
-function incrementMoveCountIfNeeded(vehicleID) {
-    if (vehicleID !== myGame.lastMovedVehicleID) {
-        let moveCounter = document.getElementById("movecounter")
-        myGame.moves += 1;
-        moveCounter.innerText = myGame.moves;
-    }
 }
 
 function getCoordsOfVehicle(vehicleID, board) {
@@ -266,6 +229,9 @@ function getVehicleLength(vehicleID, board) {
     return vehicleLength
 }
 
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM EEN VOERTUIG TE BEWEGEN */
+
 function clickMoveVehicleHandler(vehicleID, direction) {
     if (myGame.won !== true) {
         moveVehicle(vehicleID, direction, myGame.board);
@@ -277,15 +243,88 @@ function clickMoveVehicleHandler(vehicleID, direction) {
     }
 }
 
-function winHandler() {
-    let timeWin = document.getElementById("time-win");
-    timeWin.innerText = myGame.time;
-    stopTimer();
-    let movesWin = document.getElementById("moves-win");
-    movesWin.innerText = myGame.moves;
-    let winContainer = document.getElementById("win-container");
-    winContainer.style.display = "block";
+function moveVehicle(vehicleID, direction, board) {
+    if (canMove(vehicleID, direction, board)) {
+        let vehicleLength = getVehicleLength(vehicleID, board);
+        let row, col;
+        [row, col] = getCoordsOfVehicle(vehicleID, board);
+        if (direction === "left") {
+            board[row][col + vehicleLength - 1] = 0;
+            board[row][col - 1] = vehicleID;
+        } else if (direction === "right") {
+            board[row][col] = 0;
+            board[row][col + vehicleLength] = vehicleID;
+        } else if (direction === "up") {
+            board[row + vehicleLength - 1][col] = 0;
+            board[row - 1][col] = vehicleID;
+        } else if (direction === "down") {
+            board[row][col] = 0;
+            board[row + vehicleLength][col] = vehicleID;
+        }
+        incrementMoveCountIfNeeded(vehicleID);
+        myGame.lastMovedVehicleID = vehicleID;
+        if (myGame.timerInterval === null) {
+            startTimer();
+        }
+    }
 }
+
+function canMove(vehicleID, direction, board) {
+    let vehicleLength = getVehicleLength(vehicleID, board);
+    let row, col;
+    [row, col] = getCoordsOfVehicle(vehicleID, board);
+    if (direction === "left") {
+        return (col-1) >= 0 && board[row][col-1] === 0;
+    } else if (direction === "right") {
+        return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
+    } else if (direction === "up") {
+        return (row-1) >= 0 && board[row-1][col] === 0;
+    } else if (direction === "down") {
+        return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
+    }
+}
+
+function incrementMoveCountIfNeeded(vehicleID) {
+    if (vehicleID !== myGame.lastMovedVehicleID) {
+        let moveCounter = document.getElementById("movecounter")
+        myGame.moves += 1;
+        moveCounter.innerText = myGame.moves;
+    }
+}
+
+function resetMoveCounter() {
+    myGame.moves = 0;
+    myGame.lastMovedVehicleID = 0;
+    let moveCounter = document.getElementById("movecounter");
+    moveCounter.innerText = myGame.moves;
+}
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM DE GEBRUIKTE TIJD BIJ TE HOUDEN */
+
+function startTimer() {
+    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
+}
+function incrementTimer() {
+    let timer = document.getElementById("timer");
+    myGame.time += 1;
+    timer.innerText = myGame.time;
+}
+
+function stopTimer() {
+    clearInterval(myGame.timerInterval);
+}
+
+function resetTimer() {
+    clearInterval(myGame.timerInterval);
+    myGame.time = 0;
+    myGame.timerInterval = null;
+    let timer = document.getElementById("timer");
+    timer.innerText = myGame.time;
+}
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* FUNCTIES OM EEN GEWONNEN SPEL TE DETECTEREN EN AF TE HANDELEN */
 
 function checkForWin(board) {
     let playerOrientation = getVehicleOrientation(1, board);
@@ -299,24 +338,12 @@ function checkForWin(board) {
     }
 }
 
-function restartHandler() {
-    resetTimer();
-    resetMoveCounter();
-    loadChosenLevel();
-    drawBoard(myGame.board);
-}
-
-function resetTimer() {
-    clearInterval(myGame.timerInterval);
-    myGame.time = 0;
-    myGame.timerInterval = null;
-    let timer = document.getElementById("timer");
-    timer.innerText = myGame.time;
-}
-
-function resetMoveCounter() {
-    myGame.moves = 0;
-    myGame.lastMovedVehicleID = 0;
-    let moveCounter = document.getElementById("movecounter");
-    moveCounter.innerText = myGame.moves;
+function winHandler() {
+    let timeWin = document.getElementById("time-win");
+    timeWin.innerText = myGame.time;
+    stopTimer();
+    let movesWin = document.getElementById("moves-win");
+    movesWin.innerText = myGame.moves;
+    let winContainer = document.getElementById("win-container");
+    winContainer.style.display = "block";
 }
