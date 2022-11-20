@@ -33,12 +33,12 @@
         </div>
         <div id="level-menu-container">
             <label for="level-menu">Choose a level:</label>
-            <select name="level-menu" id="level-menu" onchange="restartHandler()">
+            <select name="level-menu" id="level-menu" onchange="restartHandler(myGame)">
                 <!-- Dynamisch gegenereerd -->
             </select>
         </div>
         <div id="restart-button-container">
-            <button id="restart-button" onclick="restartHandler()">⭯</button>
+            <button id="restart-button" onclick="restartHandler(myGame)">⭯</button>
         </div>
         <div id="instructions">
             <p>

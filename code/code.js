@@ -75,7 +75,7 @@ let myGame = { board: [],
 /* FUNCTIES OM GAME OP TE STARTEN OF TE HERSTARTEN*/
 window.onload = function() {
     populateLevelMenu();
-    restartHandler();
+    restartHandler(myGame);
 }
 
 // Effect:
@@ -84,28 +84,32 @@ function populateLevelMenu() {
     document.getElementById("level-menu").innerHTML = generateLevelMenuHtml();
 }
 
+// Input:
+//   game: object - interne gamestate
 // Effect:
 //   Herstart spel op basis van selectie in level menu
-function restartHandler() {
-    resetTimer();
-    resetMoveCounter();
-    loadChosenLevel();
-}
-
-// Effect:
-//   Haalt gekozen level op, kopieert dit, en roept drawBoard() op om dit te tekenen
-function loadChosenLevel() {
-    let chosenLevel = document.getElementById("level-menu").value;
-    myGame.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel])); // Deep copy
-    drawBoard(myGame.board);
+function restartHandler(game) {
+    resetTimer(game);
+    resetMoveCounter(game);
+    loadChosenLevel(game);
 }
 
 // Input:
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
+// Effect:
+//   Haalt gekozen level op, kopieert dit, en roept drawBoard() op om dit te tekenen
+function loadChosenLevel(game) {
+    let chosenLevel = document.getElementById("level-menu").value;
+    game.board = JSON.parse(JSON.stringify(LEVELS[chosenLevel])); // Deep copy
+    drawBoard(game);
+}
+
+// Input:
+//   game: object - interne gamestate
 // Effect:
 //   Zet interne representatie om naar externe representatie op webpagina
-function drawBoard(board) {
-    document.getElementById("board-container").innerHTML = generateBoardHtml(board);
+function drawBoard(game) {
+    document.getElementById("board-container").innerHTML = generateBoardHtml(game);
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -122,10 +126,10 @@ function generateLevelMenuHtml() {
 }
 
 // Input:
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
 // Output:
 //   boardHtml: string - HTML voor <table> die spelbord extern voorstelt
-function generateBoardHtml(board) {
+function generateBoardHtml(game) {
     // Hou het aantal reeds gegenereerde vakjes per voertuig bij
     // om te weten welk soort vakje nog nodig is afhankelijk van lengte en oriëntatie
     let nSquaresGeneratedPerVehicle = {   1: 0,
@@ -140,20 +144,20 @@ function generateBoardHtml(board) {
                                          10: 0,
                                          11: 0,
                                          12: 0 }
-    let playerOrientation = getVehicleOrientation(1, board);
+    let playerOrientation = getVehicleOrientation(1, game);
     let playerRow, playerCol;
-    [playerRow, playerCol] = getCoordsOfVehicle(1, board);
+    [playerRow, playerCol] = getCoordsOfVehicle(1, game);
     let boardHtml = "<table>";
     boardHtml += WALL_ROW; // Bord bestaat uit feitelijke spelbord omringd door muren met één EXIT
-    for (let i = 0; i < board.length; i++) { // Itereer over rijen
+    for (let i = 0; i < game.board.length; i++) { // Itereer over rijen
         boardHtml += "<tr>";
         boardHtml += WALL;
-        for (let j = 0; j < board[0].length; j++) { // Itereer over kolommen
-            let value = board[i][j]; // 0 of unieke integer per voertuig
+        for (let j = 0; j < game.board[0].length; j++) { // Itereer over kolommen
+            let value = game.board[i][j]; // 0 of unieke integer per voertuig
             if (value === 0) {
                 boardHtml += EMPTY_SQUARE;
             } else {
-                boardHtml += generateVehicleHtml(value, nSquaresGeneratedPerVehicle[value], board);
+                boardHtml += generateVehicleHtml(value, nSquaresGeneratedPerVehicle[value], game);
                 nSquaresGeneratedPerVehicle[value] += 1;
             }
         }
@@ -166,7 +170,7 @@ function generateBoardHtml(board) {
     }
     if (playerOrientation === "vertical") { // Bij verticale speler EXIT onder kolom genereren
         // Totale breedte van tabel == board[0].length + 2
-        boardHtml += WALL.repeat(playerCol + 1) + EXIT_SQUARE + WALL.repeat(board[0].length - playerCol);
+        boardHtml += WALL.repeat(playerCol + 1) + EXIT_SQUARE + WALL.repeat(game.board[0].length - playerCol);
     } else {
         boardHtml += WALL_ROW;
     }
@@ -177,13 +181,13 @@ function generateBoardHtml(board) {
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 //   nSquaresAlreadyGenerated: integer - hoeveel vakjes reeds gegenereerd zijn voor dit voertuig
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
 // Output:
 //   string met HTML voor <td> die een deel van voertuig extern voorstelt
-function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, board) {
+function generateVehicleHtml(vehicleID, nSquaresAlreadyGenerated, game) {
     let vehicleType = getVehicleType(vehicleID);
-    let vehicleOrientation = getVehicleOrientation(vehicleID, board);
-    let vehicleLength = getVehicleLength(vehicleID, board);
+    let vehicleOrientation = getVehicleOrientation(vehicleID, game);
+    let vehicleLength = getVehicleLength(vehicleID, game);
     if (nSquaresAlreadyGenerated === 0) { // Eerste vakje
         if (vehicleOrientation === "horizontal") { // Genereer vakje met pijl naar links
             return `<td class="vehicle ${vehicleType} left" onclick="clickMoveVehicleHandler(${vehicleID}, 'left')">🠈</td>`;
@@ -215,14 +219,14 @@ function getVehicleType(vehicleID) {
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in VEHICLE_TYPES
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
 // Output:
 //   array van twee integers - zero-indexed coördinaten [rij, kolom] van eerste vakje van voertuig
 //                             (tegengekomen van links naar rechts en boven naar onder op het spelbord)
-function getCoordsOfVehicle(vehicleID, board) {
-    for (let i = 0; i < board.length; i++) { // Itereer over rijen
-        for (let j = 0; j < board[0].length; j++) { // Itereer over kolommen
-            if (board[i][j] === vehicleID) {
+function getCoordsOfVehicle(vehicleID, game) {
+    for (let i = 0; i < game.board.length; i++) { // Itereer over rijen
+        for (let j = 0; j < game.board[0].length; j++) { // Itereer over kolommen
+            if (game.board[i][j] === vehicleID) {
                 return [i, j];
             }
         }
@@ -231,13 +235,13 @@ function getCoordsOfVehicle(vehicleID, board) {
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in VEHICLE_TYPES
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
 // Output:
 // string - oriëntatie "horizontal" of "vertical"
-function getVehicleOrientation(vehicleID, board) {
+function getVehicleOrientation(vehicleID, game) {
     let inNRows = 0;
-    for (let i = 0; i < board.length; i++) { // Itereer over rijen
-        if (board[i].includes(vehicleID) === true) { // Voertuig heeft minstens één vakje in deze rij
+    for (let i = 0; i < game.board.length; i++) { // Itereer over rijen
+        if (game.board[i].includes(vehicleID)) { // Voertuig heeft minstens één vakje in deze rij
             inNRows += 1;
             if (inNRows > 1) { // Als een voertuig in meerdere rijen vakjes heeft staat het verticaal
                 return "vertical";
@@ -250,14 +254,14 @@ function getVehicleOrientation(vehicleID, board) {
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
-//   board: 2D-array - feitelijke spelbord
+//   game: object - interne gamestate
 // Output:
 //   vehicleLength: integer - aantal vakjes dat voertuig inneemt
-function getVehicleLength(vehicleID, board) {
+function getVehicleLength(vehicleID, game) {
     let vehicleLength = 0;
-    for (let i = 0; i < board.length; i++) { // Itereer over rijen
-        for (let j = 0; j < board.length; j++) { // Itereer over kolommen
-            if (board[i][j] === vehicleID) {
+    for (let i = 0; i < game.board.length; i++) { // Itereer over rijen
+        for (let j = 0; j < game.board.length; j++) { // Itereer over kolommen
+            if (game.board[i][j] === vehicleID) {
                 vehicleLength += 1;
             }
         }
@@ -274,13 +278,18 @@ function getVehicleLength(vehicleID, board) {
 // Effect:
 //   Beweegt voertuig indien mogelijk, tekent dan bord opnieuw en kijkt of het spel gewonnen is
 function clickMoveVehicleHandler(vehicleID, direction) {
+    // NOOT: clickMoveVehicleHandler is de enige functie die game uit de globale scope ophaalt!
+    //       Want object kan niet meegegeven worden in HTML gegenereerd door generateVehicleHtml
+    //       Mogelijke oplossingen: encapsuleer alles zodat de gamestate met this kan opgehaald worden
+    //                              hou alle gamestates ergens bij met primitieve keys en geef key mee
+    let game = myGame;
     // Geen zetten toelaten als spel al gewonnen is
-    if (myGame.won !== true && canMove(vehicleID, direction, myGame.board)) {
-        moveVehicle(vehicleID, direction, myGame.board);
-        drawBoard(myGame.board);
-        myGame.won = checkForWin(myGame.board);
-        if (myGame.won === true) {
-            winHandler();
+    if (!game.won && canMove(vehicleID, direction, game)) {
+        moveVehicle(vehicleID, direction, game);
+        drawBoard(game);
+        game.won = checkForWin(game);
+        if (game.won) {
+            winHandler(game);
         }
     }
 }
@@ -288,115 +297,158 @@ function clickMoveVehicleHandler(vehicleID, direction) {
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
 //   direction: string - een richting "left", "right", "up" of "down"
-//   board: 2D-array - feitelijke spelbord
-function moveVehicle(vehicleID, direction, board) {
-    let vehicleLength = getVehicleLength(vehicleID, board);
+//   game: object - interne gamestate
+// Effect:
+//   Schuift voertuig (in interne representatie) één vakje op in de gegeven richting en voegt zo nodig een move toe aan
+//   de movecount. Indien eerste zet - begint timer.
+function moveVehicle(vehicleID, direction, game) {
+    let vehicleLength = getVehicleLength(vehicleID, game);
     let row, col;
-    [row, col] = getCoordsOfVehicle(vehicleID, board);
+    [row, col] = getCoordsOfVehicle(vehicleID, game);
     switch (direction) {
         case "left":
-            board[row][col + vehicleLength - 1] = 0;
-            board[row][col - 1] = vehicleID;
+            game.board[row][col + vehicleLength - 1] = 0;
+            game.board[row][col - 1] = vehicleID;
             break;
         case "right":
-            board[row][col] = 0;
-            board[row][col + vehicleLength] = vehicleID;
+            game.board[row][col] = 0;
+            game.board[row][col + vehicleLength] = vehicleID;
             break;
         case "up":
-            board[row + vehicleLength - 1][col] = 0;
-            board[row - 1][col] = vehicleID;
+            game.board[row + vehicleLength - 1][col] = 0;
+            game.board[row - 1][col] = vehicleID;
             break;
         case "down":
-            board[row][col] = 0;
-            board[row + vehicleLength][col] = vehicleID;
+            game.board[row][col] = 0;
+            game.board[row + vehicleLength][col] = vehicleID;
     }
-    incrementMoveCountIfNeeded(vehicleID);
-    myGame.lastMovedVehicleID = vehicleID;
-    if (myGame.timerInterval === null) {
-        startTimer();
+    incrementMoveCountIfNeeded(vehicleID, game);
+    game.lastMovedVehicleID = vehicleID;
+    if (game.timerInterval === null) {
+        startTimer(game);
     }
 }
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
-function canMove(vehicleID, direction, board) {
-    let vehicleLength = getVehicleLength(vehicleID, board);
+//   direction: string - een richting "left", "right", "up" of "down"
+//   game: object - interne gamestate
+// Output:
+//   boolean - of voertuig kan bewegen in de gegeven richting
+function canMove(vehicleID, direction, game) {
+    let vehicleLength = getVehicleLength(vehicleID, game);
     let row, col;
-    [row, col] = getCoordsOfVehicle(vehicleID, board);
-    if (direction === "left") {
-        return (col-1) >= 0 && board[row][col-1] === 0;
-    } else if (direction === "right") {
-        return (col+vehicleLength) < board[0].length && board[row][col+vehicleLength] === 0;
-    } else if (direction === "up") {
-        return (row-1) >= 0 && board[row-1][col] === 0;
-    } else if (direction === "down") {
-        return (row+vehicleLength) < board.length && board[row+vehicleLength][col] === 0;
+    [row, col] = getCoordsOfVehicle(vehicleID, game);
+    switch (direction) {
+        case "left":
+            return (col-1) >= 0 && game.board[row][col-1] === 0;
+        case "right":
+            return (col+vehicleLength) < game.board[0].length && game.board[row][col+vehicleLength] === 0;
+        case "up":
+            return (row-1) >= 0 && game.board[row-1][col] === 0;
+        case "down":
+            return (row+vehicleLength) < game.board.length && game.board[row+vehicleLength][col] === 0;
     }
 }
 
 // Input:
 //   vehicleID: integer - identificeert uniek een voertuig, komt overeen met CSS class in const VEHICLE_TYPES
-function incrementMoveCountIfNeeded(vehicleID) {
-    if (vehicleID !== myGame.lastMovedVehicleID) {
-        let moveCounter = document.getElementById("movecounter")
-        myGame.moves += 1;
-        moveCounter.innerText = myGame.moves;
+//   game: object - interne gamestate
+// Effect:
+//   Indien deze zet niet hetzelfde voertuig als de vorige zet beweegt,
+//   telt 1 op bij de interne movecount en update de externe
+function incrementMoveCountIfNeeded(vehicleID, game) {
+    if (vehicleID !== game.lastMovedVehicleID) {
+        let moveCounter = document.getElementById("movecounter");
+        game.moves += 1;
+        moveCounter.innerText = game.moves;
     }
 }
 
-
-function resetMoveCounter() {
-    myGame.moves = 0;
-    myGame.lastMovedVehicleID = 0;
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Zet interne movecount op 0 en update de externe, wist info over laatst bewogen voertuig
+function resetMoveCounter(game) {
+    game.moves = 0;
+    game.lastMovedVehicleID = 0;
     let moveCounter = document.getElementById("movecounter");
-    moveCounter.innerText = myGame.moves;
+    moveCounter.innerText = game.moves;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* FUNCTIES OM DE GEBRUIKTE TIJD BIJ TE HOUDEN */
 
-function startTimer() {
-    myGame.timerInterval = window.setInterval(incrementTimer, 1000);
-}
-function incrementTimer() {
-    let timer = document.getElementById("timer");
-    myGame.time += 1;
-    timer.innerText = myGame.time;
-}
-
-function stopTimer() {
-    clearInterval(myGame.timerInterval);
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Start de timer, wordt vanaf nu elke seconde met 1 verhoogd
+function startTimer(game) {
+    game.timerInterval = window.setInterval(incrementTimer, 1000, game);
 }
 
-function resetTimer() {
-    clearInterval(myGame.timerInterval);
-    myGame.time = 0;
-    myGame.timerInterval = null;
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Telt 1 op bij de interne timer en update de externe
+function incrementTimer(game) {
     let timer = document.getElementById("timer");
-    timer.innerText = myGame.time;
+    game.time += 1;
+    timer.innerText = game.time;
+}
+
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Stopt de interne timer
+function stopTimer(game) {
+    clearInterval(game.timerInterval);
+}
+
+
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Zet de interne timer op 0 en stopt het optellen hierbij, en update de externe
+function resetTimer(game) {
+    clearInterval(game.timerInterval);
+    game.time = 0;
+    game.timerInterval = null;
+    let timer = document.getElementById("timer");
+    timer.innerText = game.time;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* FUNCTIES OM EEN GEWONNEN SPEL TE DETECTEREN EN AF TE HANDELEN */
 
-function checkForWin(board) {
-    let playerOrientation = getVehicleOrientation(1, board);
-    let playerLength = getVehicleLength(1, board);
+// Input:
+//   game: object - interne gamestate
+// Output:
+//   boolean - of spel gewonnen is
+function checkForWin(game) {
+    let playerOrientation = getVehicleOrientation(1, game);
+    let playerLength = getVehicleLength(1, game);
     let row, col;
-    [row, col] = getCoordsOfVehicle(1, board);
+    [row, col] = getCoordsOfVehicle(1, game);
     if (playerOrientation === "horizontal") {
-        return col === board[0].length - playerLength;
-    } else {
-        return row === board.length - playerLength;
+        return col === game.board[0].length - playerLength; // Rechter uiteinde van player voertuig raakt EXIT
+    } else { // playerOrientation === "vertical"
+        return row === game.board.length - playerLength; // Onderste uiteinde van player voertuig raakt EXIT
     }
 }
 
-function winHandler() {
+
+// Input:
+//   game: object - interne gamestate
+// Effect:
+//   Toont bericht met felicitaties, tijd en zetten die nodig waren en optie om een nieuw spel te starten.
+//   Stopt interne timer.
+function winHandler(game) {
     let timeWin = document.getElementById("time-win");
-    timeWin.innerText = myGame.time;
-    stopTimer();
+    timeWin.innerText = game.time;
+    stopTimer(game);
     let movesWin = document.getElementById("moves-win");
-    movesWin.innerText = myGame.moves;
+    movesWin.innerText = game.moves;
     let winContainer = document.getElementById("win-container");
     winContainer.style.display = "block";
 }
